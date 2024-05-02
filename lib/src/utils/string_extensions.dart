@@ -1,4 +1,22 @@
-import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:cashflow_app/src/utils/flutter_masked_text.dart';
+
+String toRealRaw({required double value}) {
+  String formattedNumber = value.toStringAsFixed(2);
+  List<String> parts = formattedNumber.split('.');
+  String integerPart = parts[0];
+  String decimalPart = parts.length > 1 ? ',$parts[1]' : '';
+
+  String result = '';
+  int count = 0;
+  for (int i = integerPart.length - 1; i >= 0; i--) {
+    result = integerPart[i] + result;
+    count++;
+    if (count % 3 == 0 && i > 0) {
+      result = '.$result';
+    }
+  }
+  return result + decimalPart;
+}
 
 String toReal({required double value}) {
   final controller =

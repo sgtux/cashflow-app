@@ -1,6 +1,5 @@
 import 'package:cashflow_app/src/models/account/login_model.dart';
 import 'package:cashflow_app/src/models/account/login_model_result.dart';
-import 'package:cashflow_app/src/services/storage.service.dart';
 import 'package:flutter/material.dart';
 
 import 'http.service.dart';
@@ -17,13 +16,12 @@ class AccountService extends HttpService {
     return null;
   }
 
-  Future<bool> validateToken() async {
-    final storageService = StorageService();
-    await storageService.storage.ready;
+  Future<bool> validateToken() async {    
+    await storage.init();
     try {
       await get('account');
     } catch (err) {
-      storage.setToken(null);
+      storage.setToken('');
     }
     return true;
   }

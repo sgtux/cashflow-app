@@ -2,13 +2,15 @@ import 'package:localstorage/localstorage.dart';
 import 'package:cashflow_app/src/utils/constants.dart';
 
 class StorageService {
-  late LocalStorage storage = LocalStorage(cashflowStorageKey);
+  init() async {
+    await initLocalStorage();
+  }
 
-  void setToken(String? token) {
-    storage.setItem(tokenStorageKey, token);
+  void setToken(String token) {
+    localStorage.setItem(tokenStorageKey, token);
   }
 
   String? getToken() {
-    return storage.getItem(tokenStorageKey);
+    return localStorage.getItem(tokenStorageKey);
   }
 }
