@@ -7,8 +7,7 @@ import 'package:cashflow_app/src/utils/string_extensions.dart';
 import 'package:cashflow_app/src/models/household-expense/household_expense_model.dart';
 import 'package:cashflow_app/src/services/household_expense.service.dart';
 import 'package:flutter/material.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:cashflow_app/src/utils/flutter_masked_text.dart';
 
 typedef RemoveCallback = void Function(int id);
 

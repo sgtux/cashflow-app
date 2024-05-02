@@ -3,9 +3,9 @@ import 'package:cashflow_app/src/models/vehicle/vehicle.model.dart';
 import 'package:cashflow_app/src/services/fuel_expense.service.dart';
 import 'package:cashflow_app/src/utils/exception_handler.dart';
 import 'package:cashflow_app/src/utils/string_extensions.dart';
+import 'package:cashflow_app/src/utils/flutter_masked_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:intl/intl.dart';
 
 class FuelExpenseDetailScreen extends StatefulWidget {
@@ -205,7 +205,7 @@ class _FuelExpenseDetailScreenState extends State<FuelExpenseDetailScreen> {
                                           _fuelExpenseService
                                               .save(model)
                                               .then((value) {
-                                            setState(() => {isLoading = false});
+                                            setState(() => isLoading = false);
                                             if (value.isValid()) {
                                               Navigator.of(context).pop();
                                             }

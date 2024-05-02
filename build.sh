@@ -1,1 +1,1 @@
-flutter build appbundle --release --no-sound-null-safety
+flutter build appbundle --release 

@@ -54,9 +54,9 @@ class _ProjectionScreenState extends State<ProjectionScreen> {
             ),
             ExpansionPanelList(
               expandedHeaderPadding: const EdgeInsets.all(0),
-              expansionCallback: (int index, bool isExpanded) {
+              expansionCallback: (int index, bool isCollapsed) {
                 setState(() {
-                  selectedMonthYear = isExpanded ? '' : list[index].monthYear;
+                  selectedMonthYear = isCollapsed ? list[index].monthYear : '';
                 });
               },
               children: list.map<ExpansionPanel>((ProjectionModel item) {

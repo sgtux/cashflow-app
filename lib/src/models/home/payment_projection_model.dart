@@ -1,10 +1,10 @@
 class PaymentProjectionModel {
   final String description;
-  final String number;
+  final String? number;
   final int qtdInstallments;
   final DateTime? paidDate;
   final num value;
-  final String typeText;
+  final int type;
   final String creditCardName;
   final bool isIn;
 
@@ -15,7 +15,7 @@ class PaymentProjectionModel {
       required this.paidDate,
       required this.value,
       required this.isIn,
-      required this.typeText,
+      required this.type,
       required this.creditCardName});
 
   factory PaymentProjectionModel.fromMap(Map<String, dynamic> map) {
@@ -26,7 +26,7 @@ class PaymentProjectionModel {
         paidDate:
             map['paidDate'] == null ? null : DateTime.parse(map['paidDate']),
         value: map['value'],
-        typeText: map['typeText'],
+        type: map['type'],
         isIn: map['in'],
         creditCardName: map['creditCardName']);
   }

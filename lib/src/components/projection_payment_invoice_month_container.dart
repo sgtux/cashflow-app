@@ -29,10 +29,12 @@ class _ProjectionPaymentInvoiceContainerState
             margin: const EdgeInsets.only(bottom: 10, left: 20, right: 20),
             child: Column(children: [
               ExpansionPanelList(
-                expandedHeaderPadding: EdgeInsets.all(0),
-                expansionCallback: (int index, bool isExpanded) {
+                expandedHeaderPadding: const EdgeInsets.all(0),
+                expansionCallback: (int index, bool isCollapsed) {
                   setState(() {
-                    expandedCard = isExpanded ? '' : invoicePayments[index].creditCardName;
+                    expandedCard = isCollapsed
+                        ? invoicePayments[index].creditCardName
+                        : '';
                   });
                 },
                 children: invoicePayments
@@ -59,8 +61,8 @@ class _ProjectionPaymentInvoiceContainerState
                     body: Column(
                         children: item.payments
                             .map((p) => Container(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 2),
                                 color: item.payments.indexOf(p) % 2 == 0
                                     ? Colors.grey.shade200
                                     : Colors.grey.shade300,
@@ -92,7 +94,7 @@ class _ProjectionPaymentInvoiceContainerState
                                       )
                                     ])))
                             .toList()),
-                    isExpanded:  expandedCard == item.creditCardName,
+                    isExpanded: expandedCard == item.creditCardName,
                   );
                 }).toList(),
               )
