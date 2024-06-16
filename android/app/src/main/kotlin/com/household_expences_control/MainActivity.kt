@@ -1,4 +1,4 @@
-package com.household_expences_control
+package com.household_expense_control
 
 import io.flutter.embedding.android.FlutterActivity
 

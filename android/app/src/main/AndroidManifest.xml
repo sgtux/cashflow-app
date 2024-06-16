@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.household_expences_control">
+    package="com.household_expense_control">
   <uses-permission android:name="android.permission.INTERNET"/>
    <application
         android:label="Controlador de Despesas Domésticas"
