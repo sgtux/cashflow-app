@@ -3,6 +3,8 @@ import 'package:cashflow_app/src/pages/resume/projection_screen.dart';
 import 'package:cashflow_app/src/pages/resume/resume_screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/fuel_expense_list.screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/vehicle_list.screen.dart';
+import 'package:cashflow_app/src/services/storage.service.dart';
+import 'package:cashflow_app/src/utils/constants.dart';
 import "package:flutter/material.dart";
 
 class Home extends StatefulWidget {
@@ -13,6 +15,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final StorageService storageService = StorageService();
   int _index = 0;
 
   final List<Widget> _screens = const [
@@ -32,7 +35,23 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("CASHFLOW")),
+      appBar: AppBar(
+        title: const Text("CASHFLOW"),
+        actions: [
+          ButtonBar(
+            alignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              TextButton(
+                  child: const Text('Sair'),
+                  onPressed: () {
+                    storageService.setToken('');
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, Routes.login, (_) => false);
+                  }),
+            ],
+          )
+        ],
+      ),
       body: _screens[_index],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

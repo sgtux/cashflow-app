@@ -139,6 +139,13 @@ class _FuelExpenseListScreenState extends State<FuelExpenseListScreen> {
             ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          if (vehicles.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Sem veículos cadastrados.'),
+              backgroundColor: Colors.red,
+            ));
+            return;
+          }
           Map<String, dynamic> args = {};
           args['vehicles'] = vehicles;
           args['fuelExpenseModel'] = FuelExpenseModel(

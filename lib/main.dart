@@ -1,3 +1,4 @@
+import 'package:cashflow_app/firebase_options.dart';
 import 'package:cashflow_app/src/pages/household_expense_detail.dart';
 import 'package:cashflow_app/src/pages/splash_screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/fuel_expense_detail.screen.dart';
@@ -5,12 +6,15 @@ import 'package:cashflow_app/src/pages/vehicle/fuel_expense_list.screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/vehicle_detail.screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/vehicle_list.screen.dart';
 import 'package:cashflow_app/src/utils/constants.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'src/pages/home.dart';
 import 'src/pages/login.dart';
 import 'src/pages/household_expense_list.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 

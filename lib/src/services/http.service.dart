@@ -26,6 +26,13 @@ class HttpService {
     return handleReponse(response, url);
   }
 
+  Future<ResultModel> postString(String url, String body) async {
+    final response = await http.post(Uri.parse("$urlApi/$url"),
+        headers: getHeaders(), body: body);
+
+    return handleReponse(response, url);
+  }
+
   Future<ResultModel> put(String url, ModelBase model) async {
     final response = await http.put(Uri.parse("$urlApi/$url"),
         headers: getHeaders(), body: json.encode(model.toMap()));

@@ -1,0 +1,23 @@
+{
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "cashflow-423301",
+                    "appId": "1:77789232625:android:6ab52844f64d9fe517d850",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/firebase_options.dart": {
+                    "projectId": "cashflow-423301",
+                    "configurations": {
+                        "android": "1:77789232625:android:6ab52844f64d9fe517d850",
+                        "ios": "1:77789232625:ios:a02a3f787136afd917d850",
+                        "web": "1:77789232625:web:06b0c660f983976c17d850"
+                    }
+                }
+            }
+        }
+    }
+}
