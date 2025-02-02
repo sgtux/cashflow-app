@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:cashflow_app/src/utils/constants.dart';
 import 'package:cashflow_app/src/utils/exception_handler.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 import '../services/account.service.dart';
 import '../services/storage.service.dart';
 
@@ -25,7 +28,7 @@ class _LoginState extends State<Login> {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text("CASHFLOW"),
+          title: const Text("Cashflow"),
         ),
         body: Center(
             child: Container(
@@ -62,22 +65,45 @@ class _LoginState extends State<Login> {
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                          isLoading = true;
-                        });
+                        setState(() => isLoading = true);
                         accountService.login(email, password).then((res) {
-                          setState(() => {isLoading = false});
+                          setState(() => isLoading = false);
                           if (res != null) {
                             storageService.setToken(res.token);
                             Navigator.pushNamedAndRemoveUntil(
                                 context, Routes.home, (_) => false);
                           }
                         }).catchError((error) {
-                          setState(() => {isLoading = false});
+                          setState(() => isLoading = false);
                           handleHttpException(error, context);
                         });
                       },
                       child: const Text("Entrar")),
+              const SizedBox(
+                height: 20,
+              ),
+              const Divider(height: sqrt1_2),
+              const SizedBox(
+                height: 20,
+              ),
+              SignInButton(
+                Buttons.Google,
+                text: 'Entrar com Google',
+                onPressed: () {
+                  setState(() => isLoading = true);
+                  accountService.googleLogin().then((res) {
+                    setState(() => isLoading = false);
+                    if (res != null) {
+                      storageService.setToken(res.token);
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, Routes.home, (_) => false);
+                    }
+                  }).catchError((error) {
+                    setState(() => isLoading = false);
+                    handleHttpException(error, context);
+                  });
+                },
+              )
             ],
           ),
         )));

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "77789232625",
+    "project_id": "cashflow-423301",
+    "storage_bucket": "cashflow-423301.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:77789232625:android:6ab52844f64d9fe517d850",
+        "android_client_info": {
+          "package_name": "com.household_expense_control"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "77789232625-ussoka9ve0bmdaj1d98ipn24gru1jfmk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.household_expense_control",
+            "certificate_hash": "647a8ae49d5be6ad8f06886c7d1c881835703e91"
+          }
+        },
+        {
+          "client_id": "77789232625-nrnencekg861asg0ski6kdp6t07hda2n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDa5tVEWOSGuGhlo5pAow2c7qhO5WB2R8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "77789232625-5ufc8ebrpprsf3orgfsg3parhjjicvek.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "77789232625-rlmmmbl2fhadkmgk7jt3l7c9e52equnk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.cashflowApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
