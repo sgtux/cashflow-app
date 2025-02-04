@@ -22,7 +22,7 @@ class AccountService extends HttpService {
     final googleAuth = await googleAccount?.authentication;
     String idToken = googleAuth?.idToken ?? '';
     if (idToken != '') {
-      final result = await postString('/account/GoogleSignIn', '"$idToken"');
+      final result = await postString('account/GoogleSignIn', '"$idToken"');
       return LoginModelResult.fromMap(result.data);
     }
 

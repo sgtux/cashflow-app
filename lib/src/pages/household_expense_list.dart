@@ -163,7 +163,8 @@ class _HouseholdExpenseListState extends State<HouseholdExpenseList> {
                                         );
                                       });
                                 },
-                                title: Text(elipsis(list[idx].description, 30)),
+                                title: Text(
+                                    "${elipsis(list[idx].description, 30)} (${list[idx].typeDescription!})"),
                                 subtitle: Row(children: [
                                   Text(
                                     toReal(value: list[idx].value),
@@ -174,7 +175,6 @@ class _HouseholdExpenseListState extends State<HouseholdExpenseList> {
                                   const Text(" - "),
                                   Text(toDateString(value: list[idx].date)),
                                   const Text(" - "),
-                                  Text(list[idx].typeDescription!),
                                   const Text(" - "),
                                   list[idx].vehicleId != null
                                       ? const Icon(

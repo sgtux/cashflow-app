@@ -11,8 +11,16 @@ void handleHttpException(dynamic error, BuildContext context) {
       Navigator.pushNamedAndRemoveUntil(context, Routes.login, (_) => false);
     }
   } else {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text("Erro inesperado ocorreu."),
+    String errorMessage;
+    
+    if(error is Exception){
+      errorMessage = "Erro inesperado: $error";
+    }else{
+      errorMessage = "Erro inesperado ocorreu.";
+      print(error);
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(errorMessage),
       backgroundColor: Colors.red,
     ));
   }
