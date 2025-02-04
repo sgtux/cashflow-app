@@ -14,17 +14,7 @@ class ResumeScreen extends StatefulWidget {
 class _ResumeScreenState extends State<ResumeScreen> {
   late HomeService homeService;
   bool isLoading = false;
-  List<HomeDataModel> list = [];
-  final List<Color?> listColors = [
-    Colors.red,
-    Colors.orange.shade600,
-    Colors.orange.shade800,
-    Colors.blue.shade300,
-    Colors.blue.shade800,
-    Colors.green.shade700,
-    Colors.green.shade900,
-    Colors.green.shade500,
-  ];
+  HomeDataModel homeDataModel = HomeDataModel.initialValue();
 
   @override
   void initState() {
@@ -39,7 +29,7 @@ class _ResumeScreenState extends State<ResumeScreen> {
     homeService.getHomeData().then((value) {
       setState(() {
         isLoading = false;
-        list = value;
+        homeDataModel = value;
       });
     }).catchError((error) {
       setState(() {
@@ -54,28 +44,146 @@ class _ResumeScreenState extends State<ResumeScreen> {
     homeService = HomeService(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(children: [
-              Expanded(
-                  child: ListView.builder(
-                      itemCount: list.length,
-                      itemBuilder: (BuildContext ctx, int idx) {
-                        return Card(
-                            child: ListTile(
-                          title: Text(toReal(value: list[idx].value.toDouble()),
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  color: listColors[list[idx].index])),
-                          subtitle: Text(
-                            list[idx].description,
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: listColors[list[idx].index]),
-                          ),
-                        ));
-                      }))
-            ]),
+          : SingleChildScrollView(
+              child: Card(
+              child: Column(children: [
+                const SizedBox(height: 10),
+                const Text("LIMITES"),
+                ListView.builder(
+                    itemCount: homeDataModel.limitValues.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (BuildContext ctx, int idx) {
+                      return Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          child: Column(children: [
+                            Text(
+                              homeDataModel.limitValues[idx].description,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            LinearProgressIndicator(
+                              value: homeDataModel.limitValues[idx].percent
+                                  .toDouble(),
+                              backgroundColor: Colors.grey.shade300,
+                              color: homeDataModel.limitValues[idx].color,
+                              minHeight: 14,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(6)),
+                            ),
+                            Text(
+                                "${toReal(value: homeDataModel.limitValues[idx].spent.toDouble())} / ${toReal(value: homeDataModel.limitValues[idx].limit.toDouble())}",
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color:
+                                        homeDataModel.limitValues[idx].color)),
+                          ]));
+                    }),
+                const Divider(),
+                const SizedBox(height: 4),
+                const Text("PENDÊNCIAS"),
+                ListView.builder(
+                    itemCount: homeDataModel.pendingPayments.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (BuildContext ctx, int idx) {
+                      return Card(
+                          child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      homeDataModel
+                                          .pendingPayments[idx].description,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                    Text(
+                                        toReal(
+                                            value: homeDataModel
+                                                .pendingPayments[idx].value
+                                                .toDouble()),
+                                        style: const TextStyle(
+                                            fontSize: 14, color: Colors.red)),
+                                  ])));
+                    }),
+                const Divider(),
+                const SizedBox(height: 6),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  const Text("ENTRADAS - "),
+                  Text(
+                    toReal(value: homeDataModel.totalInflows.toDouble()),
+                    style: const TextStyle(color: Colors.green),
+                  )
+                ]),
+                ListView.builder(
+                    itemCount: homeDataModel.inflows.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (BuildContext ctx, int idx) {
+                      return Card(
+                          child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      homeDataModel.inflows[idx].description,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                    Text(
+                                        toReal(
+                                            value: homeDataModel
+                                                .inflows[idx].value
+                                                .toDouble()),
+                                        style: const TextStyle(
+                                            fontSize: 14, color: Colors.green)),
+                                  ])));
+                    }),
+                const Divider(),
+                const SizedBox(height: 6),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  const Text("SAÍDAS - "),
+                  Text(
+                    toReal(value: homeDataModel.totalOutflows.toDouble()),
+                    style: const TextStyle(color: Colors.red),
+                  )
+                ]),
+                ListView.builder(
+                    itemCount: homeDataModel.outflows.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (BuildContext ctx, int idx) {
+                      return Card(
+                          child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      homeDataModel.outflows[idx].description,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                    Text(
+                                        toReal(
+                                            value: homeDataModel
+                                                .outflows[idx].value
+                                                .toDouble()),
+                                        style: const TextStyle(
+                                            fontSize: 14, color: Colors.red)),
+                                  ])));
+                    })
+              ]),
+            )),
     );
   }
 }
