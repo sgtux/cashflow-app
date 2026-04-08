@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:cashflow_app/src/utils/constants.dart';
 import 'package:cashflow_app/src/utils/exception_handler.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../services/account.service.dart';
 import '../services/storage.service.dart';
 
@@ -86,9 +86,9 @@ class _LoginState extends State<Login> {
               const SizedBox(
                 height: 20,
               ),
-              SignInButton(
-                Buttons.Google,
-                text: 'Entrar com Google',
+              ElevatedButton.icon(
+                label: const Text('Entrar com Google'),
+                icon: FaIcon(FontAwesomeIcons.google),
                 onPressed: () {
                   setState(() => isLoading = true);
                   accountService.googleLogin().then((res) {

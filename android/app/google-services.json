@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "77789232625",
     "project_id": "cashflow-423301",
-    "storage_bucket": "cashflow-423301.appspot.com"
+    "storage_bucket": "cashflow-423301.firebasestorage.app"
   },
   "client": [
     {
@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "77789232625-ussoka9ve0bmdaj1d98ipn24gru1jfmk.apps.googleusercontent.com",
+          "client_id": "77789232625-58ph7ccsbualsb9lqi6gndfloe8llg27.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.household_expense_control",
-            "certificate_hash": "647a8ae49d5be6ad8f06886c7d1c881835703e91"
+            "certificate_hash": "10c062802a61e8248aa1dfcbd0f49867313d5e65"
           }
         },
         {
