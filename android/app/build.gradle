@@ -21,14 +21,14 @@ if (flutterVersionCode == null) {
     flutterVersionCode = '1'
 }
 
-print('\nVersionCode:' + flutterVersionCode + '\n')
+print('\nVersionCode: ' + flutterVersionCode)
+print('\nstoreFile: ' + localProperties['storeFile'])
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-print localProperties['storeFile']
 
 android {
     namespace "com.household_expense_control"
@@ -53,7 +53,7 @@ android {
         applicationId "com.household_expense_control"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 23
+        minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

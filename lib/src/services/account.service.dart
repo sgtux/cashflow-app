@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/models/account/google_login_model.dart';
 import 'package:cashflow_app/src/models/account/login_model.dart';
 import 'package:cashflow_app/src/models/account/login_model_result.dart';
 import 'package:flutter/material.dart';
@@ -18,12 +19,18 @@ class AccountService extends HttpService {
   }
 
   Future<LoginModelResult?> googleLogin() async {
-    final googleAccount = await GoogleSignIn().signIn();
-    final googleAuth = await googleAccount?.authentication;
-    String idToken = googleAuth?.idToken ?? '';
-    if (idToken != '') {
-      final result = await postString('account/GoogleSignIn', '"$idToken"');
-      return LoginModelResult.fromMap(result.data);
+    await GoogleSignIn.instance.initialize();
+
+    if (GoogleSignIn.instance.supportsAuthenticate()) {
+      final googleAuth =
+          await GoogleSignIn.instance.authenticate(scopeHint: ['email']);
+
+      String idToken = googleAuth.authentication.idToken ?? '';
+      if (idToken != '') {
+        final result = await post(
+            'account/GoogleSignIn', GoogleLoginModel(idToken: idToken));
+        return LoginModelResult.fromMap(result.data);
+      }
     }
 
     return null;
