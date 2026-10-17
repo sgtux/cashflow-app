@@ -156,8 +156,8 @@ class _FuelExpenseDetailScreenState extends State<FuelExpenseDetailScreen> {
                               showDatePicker(
                                       context: context,
                                       initialDate: DateTime.now(),
-                                      firstDate: DateTime(2018),
-                                      lastDate: DateTime(2026))
+                                      firstDate: DateTime(DateTime.now().year - 4),
+                                      lastDate: DateTime(DateTime.now().year + 2))
                                   .then((date) => {
                                         dateController.text = toDateString(
                                             value: date, separator: '/')

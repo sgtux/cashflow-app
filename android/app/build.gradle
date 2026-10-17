@@ -22,7 +22,8 @@ if (flutterVersionCode == null) {
 }
 
 print('\nVersionCode: ' + flutterVersionCode)
-print('\nstoreFile: ' + localProperties['storeFile'])
+print('\nStoreFile: ' + localProperties['storeFile'])
+print('\nCompileSdkVersion ' + flutter.compileSdkVersion)
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
