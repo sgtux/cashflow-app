@@ -1,0 +1,139 @@
+# Gera um Android App Bundle (.aab) de release assinado a cada push,
+# pronto para enviar ao Google Play Console.
+#
+# Secrets necessários no environment "AAB Generator"
+# (Settings → Environments → AAB Generator → Environment secrets):
+#   ANDROID_KEYSTORE_BASE64  - upload-keystore.jks em base64 (base64 -w0 upload-keystore.jks)
+#   ANDROID_KEYSTORE_PASSWORD - senha do keystore (storePassword)
+#   ANDROID_KEY_ALIAS         - alias da chave (keyAlias)
+#   ANDROID_KEY_PASSWORD      - senha da chave (keyPassword)
+name: Android release (AAB)
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.47.7
+  # O versionCode precisa aumentar a cada envio ao Google Play. Ele é gerado a
+  # partir do número da execução, somado a um valor acima dos já publicados.
+  VERSION_CODE_OFFSET: 1000
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Os secrets de assinatura ficam neste environment.
+    environment: AAB Generator
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Cache do Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Instalar dependências
+        run: flutter pub get
+
+      - name: Testes
+        run: flutter test
+
+      - name: Configurar assinatura
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
+
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            [ -n "${!name}" ] || fail "Secret ANDROID_$name não configurado no environment."
+          done
+
+          # Remove quebras de linha e espaços que costumam vir junto ao colar o valor.
+          KEY_ALIAS=$(printf '%s' "$KEY_ALIAS" | tr -d '\r\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+          KEYSTORE_PASSWORD=$(printf '%s' "$KEYSTORE_PASSWORD" | tr -d '\r\n')
+          KEY_PASSWORD=$(printf '%s' "$KEY_PASSWORD" | tr -d '\r\n')
+          export KEYSTORE_PASSWORD KEY_PASSWORD
+
+          keystore="$RUNNER_TEMP/upload-keystore.jks"
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 --decode > "$keystore" \
+            || fail "ANDROID_KEYSTORE_BASE64 não é um base64 válido."
+
+          keytool -list -keystore "$keystore" -storepass:env KEYSTORE_PASSWORD > /dev/null 2>&1 \
+            || fail "Não foi possível abrir o keystore: ANDROID_KEYSTORE_PASSWORD incorreta ou ANDROID_KEYSTORE_BASE64 corrompido."
+
+          if ! keytool -list -keystore "$keystore" -storepass:env KEYSTORE_PASSWORD -alias "$KEY_ALIAS" > /dev/null 2>&1; then
+            aliases=$(keytool -list -keystore "$keystore" -storepass:env KEYSTORE_PASSWORD 2>/dev/null \
+              | grep -E 'PrivateKeyEntry' | cut -d, -f1 | paste -sd ', ')
+            fail "Alias '$KEY_ALIAS' (ANDROID_KEY_ALIAS) não existe no keystore. Aliases disponíveis: $aliases"
+          fi
+
+          keytool -certreq -keystore "$keystore" -storepass:env KEYSTORE_PASSWORD \
+            -alias "$KEY_ALIAS" -keypass:env KEY_PASSWORD > /dev/null 2>&1 \
+            || fail "ANDROID_KEY_PASSWORD incorreta para a chave '$KEY_ALIAS'."
+
+          echo "Keystore e chave '$KEY_ALIAS' validados."
+
+          # Em arquivos .properties a barra invertida é caractere de escape.
+          escape() { printf '%s' "$1" | sed 's/\\/\\\\/g'; }
+          {
+            # O Flutter grava o local.properties sem quebra de linha no final;
+            # sem esta linha em branco, o storeFile grudaria na última linha.
+            echo
+            echo "storeFile=$keystore"
+            echo "storePassword=$(escape "$KEYSTORE_PASSWORD")"
+            echo "keyAlias=$(escape "$KEY_ALIAS")"
+            echo "keyPassword=$(escape "$KEY_PASSWORD")"
+          } >> android/local.properties
+
+      - name: Gerar App Bundle
+        id: build
+        run: |
+          # Usa o "major.minor" do pubspec.yaml e o número da execução como patch
+          # (ex.: version: 1.1.20+24 no pubspec → 1.1.<execução>).
+          major_minor=$(grep '^version:' pubspec.yaml | sed 's/version: *//; s/+.*//' | cut -d. -f1,2)
+          version_name="$major_minor.$GITHUB_RUN_NUMBER"
+          version_code=$((VERSION_CODE_OFFSET + GITHUB_RUN_NUMBER))
+          echo "Versão $version_name ($version_code)"
+          flutter build appbundle --release \
+            --build-name="$version_name" \
+            --build-number="$version_code"
+          echo "name=cashflow-$version_name-$version_code" >> "$GITHUB_OUTPUT"
+
+      - name: Publicar artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build.outputs.name }}
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remover keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload-keystore.jks"
