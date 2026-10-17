@@ -18,7 +18,7 @@ void main() {
         tester.view.physicalSize = entry.value * 3;
         tester.view.devicePixelRatio = 3;
         addTearDown(tester.view.reset);
-        AppSettings.loginThemeMode.value = mode;
+        AppSettings.themeModeV2.value = mode;
 
         await tester.pumpWidget(const MaterialApp(home: LoginV2()));
         await tester.pumpAndSettle();

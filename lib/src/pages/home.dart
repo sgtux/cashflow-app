@@ -1,9 +1,11 @@
 import 'package:cashflow_app/src/pages/household_expense_list.dart';
 import 'package:cashflow_app/src/pages/resume/projection_screen.dart';
+import 'package:cashflow_app/src/pages/resume/projection_screen_v2.dart';
 import 'package:cashflow_app/src/pages/resume/resume_screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/fuel_expense_list.screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/vehicle_list.screen.dart';
 import 'package:cashflow_app/src/services/storage.service.dart';
+import 'package:cashflow_app/src/utils/app_settings.dart';
 import 'package:cashflow_app/src/utils/constants.dart';
 import "package:flutter/material.dart";
 
@@ -18,12 +20,17 @@ class _HomeState extends State<Home> {
   final StorageService storageService = StorageService();
   int _index = 0;
 
-  final List<Widget> _screens = const [
-    ResumeScreen(),
-    HouseholdExpenseList(),
-    FuelExpenseListScreen(),
-    VehicleListScreen(),
-    ProjectionScreen()
+  final List<Widget> _screens = [
+    const ResumeScreen(),
+    const HouseholdExpenseList(),
+    const FuelExpenseListScreen(),
+    const VehicleListScreen(),
+    ValueListenableBuilder<int>(
+      valueListenable: AppSettings.projectionVersion,
+      builder: (context, version, _) => version == 2
+          ? const ProjectionScreenV2()
+          : const ProjectionScreen(),
+    ),
   ];
 
   _incrementTap(index) {

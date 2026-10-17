@@ -18,11 +18,9 @@ class LoginV2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ThemeMode>(
-      valueListenable: AppSettings.loginThemeMode,
+      valueListenable: AppSettings.themeModeV2,
       builder: (context, mode, _) {
-        final isDark = mode == ThemeMode.dark ||
-            (mode == ThemeMode.system &&
-                MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+        final isDark = AppSettings.isDarkV2(context);
         return Theme(
           data: isDark ? AppTheme.dark : AppTheme.light,
           child: _LoginV2Body(isDark: isDark),
@@ -126,11 +124,6 @@ class _LoginV2BodyState extends State<_LoginV2Body> {
     }
   }
 
-  void _toggleTheme() {
-    AppSettings.setLoginThemeMode(
-        widget.isDark ? ThemeMode.light : ThemeMode.dark);
-  }
-
   void _switchToClassicLogin() {
     AppSettings.setLoginVersion(1);
     Navigator.pushReplacementNamed(context, Routes.login);
@@ -172,11 +165,11 @@ class _LoginV2BodyState extends State<_LoginV2Body> {
 
   Widget _buildTopBar() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const Spacer(),
         IconButton(
           tooltip: widget.isDark ? 'Usar tema claro' : 'Usar tema escuro',
-          onPressed: _toggleTheme,
+          onPressed: () => AppSettings.toggleThemeV2(context),
           icon: Icon(widget.isDark
               ? Icons.light_mode_outlined
               : Icons.dark_mode_outlined),
