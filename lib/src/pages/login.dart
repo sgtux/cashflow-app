@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cashflow_app/src/utils/app_settings.dart';
 import 'package:cashflow_app/src/utils/constants.dart';
 import 'package:cashflow_app/src/utils/exception_handler.dart';
 import 'package:flutter/material.dart';
@@ -109,6 +110,17 @@ class _LoginState extends State<Login> {
                     }
                   });
                 },
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  AppSettings.setLoginVersion(2);
+                  Navigator.pushReplacementNamed(context, Routes.login);
+                },
+                icon: const Icon(Icons.auto_awesome),
+                label: const Text('Experimentar o novo login'),
               )
             ],
           ),

@@ -4,14 +4,19 @@ import 'package:cashflow_app/src/pages/vehicle/fuel_expense_detail.screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/fuel_expense_list.screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/vehicle_detail.screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/vehicle_list.screen.dart';
+import 'package:cashflow_app/src/utils/app_settings.dart';
 import 'package:cashflow_app/src/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'src/pages/home.dart';
 import 'src/pages/login.dart';
+import 'src/pages/login_v2.dart';
 import 'src/pages/household_expense_list.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initLocalStorage();
+  AppSettings.load();
   runApp(const MyApp());
 }
 
@@ -27,7 +32,9 @@ class MyApp extends StatelessWidget {
       routes: {
         Routes.splash: (context) => const SplashScreen(),
         Routes.home: (context) => const Home(),
-        Routes.login: (context) => const Login(),
+        Routes.login: (context) => AppSettings.loginVersion.value == 2
+            ? const LoginV2()
+            : const Login(),
         Routes.householdExpenseList: (context) => const HouseholdExpenseList(),
         Routes.householdExpenseDetail: (context) =>
             const HouseholdExpenseDetail(),

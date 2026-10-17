@@ -1,5 +1,7 @@
 const String cashflowStorageKey = '@CASHFLOW_STORAGE_KEY';
 const String tokenStorageKey = '@TOKEN_STORAGE_KEY';
+const String loginVersionStorageKey = '@LOGIN_VERSION_STORAGE_KEY';
+const String loginThemeStorageKey = '@LOGIN_THEME_STORAGE_KEY';
 const String urlApi = 'https://cashfloweb.azurewebsites.net/api';
 // const String urlApi = 'http://172.31.31.1:56666/api';
 
