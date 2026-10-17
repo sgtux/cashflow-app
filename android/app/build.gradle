@@ -61,12 +61,18 @@ android {
     }
 
     signingConfigs {
-       release {
-           keyAlias localProperties['keyAlias']
-           keyPassword localProperties['keyPassword']
-           storeFile localProperties['storeFile'] ? file(localProperties['storeFile']) : null
-           storePassword localProperties['storePassword']
-       }
+        debug {
+            keyAlias localProperties['keyAlias']
+            keyPassword localProperties['keyPassword']
+            storeFile localProperties['storeFile'] ? file(localProperties['storeFile']) : null
+            storePassword localProperties['storePassword']
+        }
+        release {
+            keyAlias localProperties['keyAlias']
+            keyPassword localProperties['keyPassword']
+            storeFile localProperties['storeFile'] ? file(localProperties['storeFile']) : null
+            storePassword localProperties['storePassword']
+        }
     }
 
     buildTypes {

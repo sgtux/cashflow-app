@@ -4,6 +4,7 @@ import 'package:cashflow_app/src/utils/constants.dart';
 import 'package:cashflow_app/src/utils/exception_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../services/account.service.dart';
 import '../services/storage.service.dart';
 
@@ -98,9 +99,14 @@ class _LoginState extends State<Login> {
                       Navigator.pushNamedAndRemoveUntil(
                           context, Routes.home, (_) => false);
                     }
-                  }).catchError((error) {
+                  }).catchError((error, stackTrace) {
                     setState(() => isLoading = false);
-                    handleHttpException(error, context);
+                    if (error is GoogleSignInException) {
+                      handleGoogleSignInException(error, stackTrace, context);
+                    } else {
+                      debugPrint('[GoogleLogin] Erro: $error\n$stackTrace');
+                      handleHttpException(error, context);
+                    }
                   });
                 },
               )
