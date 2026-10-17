@@ -7,14 +7,20 @@ import 'constants.dart';
 /// e o tema claro/escuro compartilhado por essas telas.
 class AppSettings {
   static final ValueNotifier<int> loginVersion = ValueNotifier(1);
-  static final ValueNotifier<int> projectionVersion = ValueNotifier(1);
+
+  /// Versão das telas internas do app (abas da Home e formulários).
+  static final ValueNotifier<int> screensVersion = ValueNotifier(1);
   static final ValueNotifier<ThemeMode> themeModeV2 =
       ValueNotifier(ThemeMode.system);
 
   /// Deve ser chamado depois de `initLocalStorage()`.
   static void load() {
     loginVersion.value = _readVersion(loginVersionStorageKey);
-    projectionVersion.value = _readVersion(projectionVersionStorageKey);
+    // Antes só a projeção tinha nova versão; aproveita a escolha feita nela.
+    screensVersion.value =
+        localStorage.getItem(screensVersionStorageKey) != null
+            ? _readVersion(screensVersionStorageKey)
+            : _readVersion(projectionVersionStorageKey);
     themeModeV2.value =
         _parseThemeMode(localStorage.getItem(themeV2StorageKey));
   }
@@ -22,8 +28,8 @@ class AppSettings {
   static void setLoginVersion(int version) =>
       _setVersion(loginVersion, loginVersionStorageKey, version);
 
-  static void setProjectionVersion(int version) =>
-      _setVersion(projectionVersion, projectionVersionStorageKey, version);
+  static void setScreensVersion(int version) =>
+      _setVersion(screensVersion, screensVersionStorageKey, version);
 
   static void setThemeModeV2(ThemeMode mode) {
     themeModeV2.value = mode;

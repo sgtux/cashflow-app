@@ -1,7 +1,6 @@
 import 'package:cashflow_app/src/components/projection_payment_month_container.dart';
 import 'package:cashflow_app/src/models/home/projection_model.dart';
 import 'package:cashflow_app/src/services/home.service.dart';
-import 'package:cashflow_app/src/utils/app_settings.dart';
 import 'package:cashflow_app/src/utils/exception_handler.dart';
 import 'package:cashflow_app/src/utils/string_extensions.dart';
 import 'package:flutter/material.dart';
@@ -52,11 +51,6 @@ class _ProjectionScreenState extends State<ProjectionScreen> {
             child: Column(children: [
             const SizedBox(
               height: 10,
-            ),
-            TextButton.icon(
-              onPressed: () => AppSettings.setProjectionVersion(2),
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text('Experimentar a nova projeção'),
             ),
             ExpansionPanelList(
               expandedHeaderPadding: const EdgeInsets.all(0),

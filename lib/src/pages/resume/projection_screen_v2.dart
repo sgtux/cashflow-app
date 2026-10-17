@@ -1,11 +1,10 @@
 import 'dart:math';
 
+import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/home/invoice_payment_model.dart';
 import 'package:cashflow_app/src/models/home/payment_projection_model.dart';
 import 'package:cashflow_app/src/models/home/projection_model.dart';
 import 'package:cashflow_app/src/services/home.service.dart';
-import 'package:cashflow_app/src/utils/app_settings.dart';
-import 'package:cashflow_app/src/utils/app_theme.dart';
 import 'package:cashflow_app/src/utils/exception_handler.dart';
 import 'package:cashflow_app/src/utils/string_extensions.dart';
 import 'package:flutter/material.dart';
@@ -23,26 +22,14 @@ class ProjectionScreenV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: AppSettings.themeModeV2,
-      builder: (context, mode, _) {
-        final isDark = AppSettings.isDarkV2(context);
-        return Theme(
-          data: isDark ? AppTheme.dark : AppTheme.light,
-          child:
-              _ProjectionV2Body(isDark: isDark, loadProjection: loadProjection),
-        );
-      },
-    );
+    return V2Theme(child: _ProjectionV2Body(loadProjection: loadProjection));
   }
 }
 
 class _ProjectionV2Body extends StatefulWidget {
-  const _ProjectionV2Body(
-      {Key? key, required this.isDark, required this.loadProjection})
+  const _ProjectionV2Body({Key? key, required this.loadProjection})
       : super(key: key);
 
-  final bool isDark;
   final ProjectionLoader? loadProjection;
 
   @override
@@ -93,57 +80,17 @@ class _ProjectionV2BodyState extends State<_ProjectionV2Body> {
       body: RefreshIndicator(
         onRefresh: _load,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           children: [
-            _buildTopBar(),
-            _buildTitle(),
+            const ScreenTitle(
+              title: 'Projeção',
+              subtitle: 'Veja como seu saldo deve evoluir nos próximos meses.',
+            ),
             const SizedBox(height: 16),
             ..._buildContent(),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTopBar() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        IconButton(
-          tooltip: widget.isDark ? 'Usar tema claro' : 'Usar tema escuro',
-          onPressed: () => AppSettings.toggleThemeV2(context),
-          icon: Icon(widget.isDark
-              ? Icons.light_mode_outlined
-              : Icons.dark_mode_outlined),
-        ),
-        Flexible(
-          child: TextButton.icon(
-            onPressed: () => AppSettings.setProjectionVersion(1),
-            icon: const Icon(Icons.swap_horiz_rounded, size: 20),
-            label: const Text('Projeção clássica',
-                maxLines: 1, overflow: TextOverflow.ellipsis),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTitle() {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Projeção',
-            style: theme.textTheme.headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text(
-          'Veja como seu saldo deve evoluir nos próximos meses.',
-          style: theme.textTheme.bodyMedium
-              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-        ),
-      ],
     );
   }
 
@@ -157,19 +104,16 @@ class _ProjectionV2BodyState extends State<_ProjectionV2Body> {
 
     if (_hasError) {
       return [
-        _MessageCard(
-          icon: Icons.cloud_off_rounded,
+        MessageCard.error(
           title: 'Não foi possível carregar a projeção',
-          message: 'Verifique sua conexão e tente de novo.',
-          actionLabel: 'Tentar novamente',
-          onAction: _load,
+          onRetry: _load,
         ),
       ];
     }
 
     if (_months.isEmpty) {
       return const [
-        _MessageCard(
+        MessageCard(
           icon: Icons.insights_rounded,
           title: 'Sua projeção aparece aqui',
           message: 'Cadastre suas receitas e despesas para ver como seu '
@@ -206,21 +150,6 @@ class _ProjectionV2BodyState extends State<_ProjectionV2Body> {
     ];
   }
 }
-
-/// Cores de entrada (positivo) e saída (negativo) de acordo com o tema.
-Color _inColor(ColorScheme scheme) => scheme.primary;
-
-Color _outColor(ColorScheme scheme) => scheme.error;
-
-Color _signedColor(ColorScheme scheme, num value) =>
-    value >= 0 ? _inColor(scheme) : _outColor(scheme);
-
-/// Formata em reais mantendo o sinal de negativo (o `toReal` descarta o sinal).
-String _money(num value) =>
-    '${value < 0 ? '-' : ''}${toReal(value: value.abs().toDouble())}';
-
-String _signed(num value) =>
-    '${value < 0 ? '-' : '+'} ${toReal(value: value.abs().toDouble())}';
 
 String _shortMonth(String monthYear) {
   final parts = monthYear.split('/');
@@ -266,10 +195,10 @@ class _BalanceCard extends StatelessWidget {
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              _money(month.accumulatedValue),
+              money(month.accumulatedValue),
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: _signedColor(scheme, month.accumulatedValue),
+                color: signedColor(scheme, month.accumulatedValue),
               ),
             ),
           ),
@@ -282,12 +211,12 @@ class _BalanceCard extends StatelessWidget {
                   icon: Icons.arrow_downward_rounded,
                   label: 'Entra',
                   value: month.totalIn.abs(),
-                  color: _inColor(scheme)),
+                  color: inColor(scheme)),
               _AmountLabel(
                   icon: Icons.arrow_upward_rounded,
                   label: 'Sai',
                   value: month.totalOut.abs(),
-                  color: _outColor(scheme)),
+                  color: outColor(scheme)),
             ],
           ),
           const SizedBox(height: 20),
@@ -330,7 +259,7 @@ class _AmountLabel extends StatelessWidget {
         const SizedBox(width: 4),
         Text('$label ', style: theme.textTheme.bodySmall),
         Text(
-          toReal(value: value.toDouble()),
+          money(value),
           style: theme.textTheme.bodySmall
               ?.copyWith(color: color, fontWeight: FontWeight.bold),
         ),
@@ -389,14 +318,14 @@ class _BalanceChart extends StatelessWidget {
           children: List.generate(months.length, (index) {
             final value = values[index];
             final selected = index == selectedIndex;
-            final color = _signedColor(scheme, value)
+            final color = signedColor(scheme, value)
                 .withValues(alpha: selected ? 1 : 0.35);
 
             return Semantics(
               button: true,
               selected: selected,
               label: '${toMonthYearText(months[index].monthYear)}: '
-                  '${_money(value)}',
+                  '${money(value)}',
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => onSelect(index),
@@ -491,7 +420,7 @@ class _InsightCard extends StatelessWidget {
       icon = Icons.warning_amber_rounded;
       title = 'Atenção ao seu saldo';
       message = 'Em ${toMonthYearText(month.monthYear)} o saldo acumulado fica '
-          'negativo (${_money(month.accumulatedValue)}). '
+          'negativo (${money(month.accumulatedValue)}). '
           'Reveja gastos ou evite novas compras parceladas até lá.';
       background = scheme.errorContainer;
       foreground = scheme.onErrorContainer;
@@ -501,7 +430,7 @@ class _InsightCard extends StatelessWidget {
       icon = Icons.savings_outlined;
       title = 'Seu dinheiro pode render';
       message = 'Seu saldo fica positivo em todos os meses, com sobra média de '
-          '${toReal(value: average.toDouble())} por mês. Que tal guardar parte '
+          '${money(average)} por mês. Que tal guardar parte '
           'dela numa reserva de emergência antes de começar a investir?';
       background = scheme.primaryContainer;
       foreground = scheme.onPrimaryContainer;
@@ -608,13 +537,13 @@ class _MonthCard extends StatelessWidget {
                     child: _AmountColumn(
                         label: 'Entradas',
                         value: totalIn,
-                        color: _inColor(scheme)),
+                        color: inColor(scheme)),
                   ),
                   Expanded(
                     child: _AmountColumn(
                         label: 'Saídas',
                         value: totalOut,
-                        color: _outColor(scheme)),
+                        color: outColor(scheme)),
                   ),
                 ],
               ),
@@ -642,9 +571,9 @@ class _MonthCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Saldo acumulado: '
-                '${_money(month.accumulatedValue)}',
+                '${money(month.accumulatedValue)}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                    color: _signedColor(scheme, month.accumulatedValue),
+                    color: signedColor(scheme, month.accumulatedValue),
                     fontWeight: FontWeight.w600),
               ),
               if (isExpanded) ...[
@@ -668,7 +597,7 @@ class _NetChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final color = _signedColor(scheme, value);
+    final color = signedColor(scheme, value);
 
     return Tooltip(
       message: 'Quanto sobra (ou falta) neste mês',
@@ -679,7 +608,7 @@ class _NetChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
-          _signed(value),
+          signedMoney(value),
           style: Theme.of(context)
               .textTheme
               .labelMedium
@@ -714,7 +643,7 @@ class _AmountColumn extends StatelessWidget {
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: Text(
-            toReal(value: value.toDouble()),
+            money(value),
             style: theme.textTheme.titleSmall
                 ?.copyWith(color: color, fontWeight: FontWeight.bold),
           ),
@@ -777,9 +706,9 @@ class _MonthDetails extends StatelessWidget {
                   subtitle: Text('${invoice.payments.length} '
                       '${invoice.payments.length == 1 ? 'lançamento' : 'lançamentos'}'),
                   trailing: Text(
-                    '- ${toReal(value: invoice.total.abs())}',
+                    '- ${money(invoice.total.abs())}',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                        color: _outColor(scheme), fontWeight: FontWeight.bold),
+                        color: outColor(scheme), fontWeight: FontWeight.bold),
                   ),
                   children: invoice.payments
                       .map((p) => _PaymentRow(payment: p))
@@ -809,7 +738,7 @@ class _PaymentRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final color = payment.isIn ? _inColor(scheme) : _outColor(scheme);
+    final color = payment.isIn ? inColor(scheme) : outColor(scheme);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -851,60 +780,10 @@ class _PaymentRow extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             '${payment.isIn ? '+' : '-'} '
-            '${toReal(value: payment.value.abs().toDouble())}',
+            '${money(payment.value.abs())}',
             style: theme.textTheme.bodyMedium
                 ?.copyWith(color: color, fontWeight: FontWeight.w600),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MessageCard extends StatelessWidget {
-  const _MessageCard(
-      {Key? key,
-      required this.icon,
-      required this.title,
-      required this.message,
-      this.actionLabel,
-      this.onAction})
-      : super(key: key);
-
-  final IconData icon;
-  final String title;
-  final String message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 48, color: scheme.primary),
-          const SizedBox(height: 12),
-          Text(title,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 6),
-          Text(message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onSurfaceVariant)),
-          if (actionLabel != null) ...[
-            const SizedBox(height: 16),
-            FilledButton(onPressed: onAction, child: Text(actionLabel!)),
-          ],
         ],
       ),
     );

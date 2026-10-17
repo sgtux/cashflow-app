@@ -18,9 +18,10 @@ class HomeService extends HttpService {
     return list;
   }
 
-  Future<HomeDataModel> getHomeData() async {
+  Future<HomeDataModel> getHomeData({int? month, int? year}) async {
     final now = DateTime.now();
-    final result = await get('Home?month=${now.month}&year=${now.year}');
+    final result = await get(
+        'Home?month=${month ?? now.month}&year=${year ?? now.year}');
     return HomeDataModel.fromMap(result.data);    
   }
 }

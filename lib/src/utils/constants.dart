@@ -1,7 +1,9 @@
 const String cashflowStorageKey = '@CASHFLOW_STORAGE_KEY';
 const String tokenStorageKey = '@TOKEN_STORAGE_KEY';
 const String loginVersionStorageKey = '@LOGIN_VERSION_STORAGE_KEY';
+// Chave antiga, lida só para migrar a escolha feita na projeção.
 const String projectionVersionStorageKey = '@PROJECTION_VERSION_STORAGE_KEY';
+const String screensVersionStorageKey = '@SCREENS_VERSION_STORAGE_KEY';
 const String themeV2StorageKey = '@THEME_V2_STORAGE_KEY';
 const String urlApi = 'https://cashfloweb.azurewebsites.net/api';
 // const String urlApi = 'http://172.31.31.1:56666/api';

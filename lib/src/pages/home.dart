@@ -1,12 +1,16 @@
+import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/pages/household_expense_list.dart';
+import 'package:cashflow_app/src/pages/household_expense_list_v2.dart';
 import 'package:cashflow_app/src/pages/resume/projection_screen.dart';
 import 'package:cashflow_app/src/pages/resume/projection_screen_v2.dart';
 import 'package:cashflow_app/src/pages/resume/resume_screen.dart';
+import 'package:cashflow_app/src/pages/resume/resume_screen_v2.dart';
 import 'package:cashflow_app/src/pages/vehicle/fuel_expense_list.screen.dart';
+import 'package:cashflow_app/src/pages/vehicle/fuel_expense_list_v2.screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/vehicle_list.screen.dart';
+import 'package:cashflow_app/src/pages/vehicle/vehicle_list_v2.screen.dart';
 import 'package:cashflow_app/src/services/storage.service.dart';
 import 'package:cashflow_app/src/utils/app_settings.dart';
-import 'package:cashflow_app/src/utils/app_theme.dart';
 import 'package:cashflow_app/src/utils/constants.dart';
 import "package:flutter/material.dart";
 
@@ -21,16 +25,20 @@ class _HomeState extends State<Home> {
   final StorageService storageService = StorageService();
   int _index = 0;
 
-  final List<Widget> _screens = [
-    const ResumeScreen(),
-    const HouseholdExpenseList(),
-    const FuelExpenseListScreen(),
-    const VehicleListScreen(),
-    ValueListenableBuilder<int>(
-      valueListenable: AppSettings.projectionVersion,
-      builder: (context, version, _) =>
-          version == 2 ? const ProjectionScreenV2() : const ProjectionScreen(),
-    ),
+  static const List<Widget> _screensV1 = [
+    ResumeScreen(),
+    HouseholdExpenseList(),
+    FuelExpenseListScreen(),
+    VehicleListScreen(),
+    ProjectionScreen(),
+  ];
+
+  static const List<Widget> _screensV2 = [
+    ResumeScreenV2(),
+    HouseholdExpenseListV2(),
+    FuelExpenseListV2Screen(),
+    VehicleListV2Screen(),
+    ProjectionScreenV2(),
   ];
 
   _incrementTap(index) {
@@ -42,11 +50,13 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     // A toolbar e o footer seguem o tema claro/escuro das telas v2.
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: AppSettings.themeModeV2,
-      builder: (context, _, __) {
-        final theme =
-            AppSettings.isDarkV2(context) ? AppTheme.dark : AppTheme.light;
+    return ListenableBuilder(
+      listenable: Listenable.merge(
+          [AppSettings.themeModeV2, AppSettings.screensVersion]),
+      builder: (context, _) {
+        final theme = V2Theme.data(context);
+        final isDark = theme.brightness == Brightness.dark;
+        final isV2 = AppSettings.screensVersion.value == 2;
 
         return Scaffold(
           appBar: PreferredSize(
@@ -56,6 +66,23 @@ class _HomeState extends State<Home> {
               child: AppBar(
                 title: const Text("CASHFLOW"),
                 actions: [
+                  IconButton(
+                    tooltip: isDark ? 'Usar tema claro' : 'Usar tema escuro',
+                    onPressed: () => AppSettings.toggleThemeV2(context),
+                    icon: Icon(isDark
+                        ? Icons.light_mode_outlined
+                        : Icons.dark_mode_outlined),
+                  ),
+                  IconButton(
+                    tooltip: isV2
+                        ? 'Voltar ao visual clássico'
+                        : 'Experimentar o novo visual',
+                    onPressed: () =>
+                        AppSettings.setScreensVersion(isV2 ? 1 : 2),
+                    icon: Icon(isV2
+                        ? Icons.history_rounded
+                        : Icons.auto_awesome_outlined),
+                  ),
                   TextButton(
                       child: const Text('Sair'),
                       onPressed: () {
@@ -68,7 +95,7 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
-          body: _screens[_index],
+          body: (isV2 ? _screensV2 : _screensV1)[_index],
           bottomNavigationBar: Theme(
             data: theme,
             child: BottomNavigationBar(
