@@ -1,5 +1,8 @@
-# Gera um Android App Bundle (.aab) de release assinado a cada push,
-# pronto para enviar ao Google Play Console.
+# Gera um Android App Bundle (.aab) de release assinado a cada push e publica
+# no Google Play:
+#   - push na main       → publica no teste interno
+#   - push em outra branch → só gera o .aab como artefato
+#   - execução manual    → publica na trilha escolhida (ou em nenhuma)
 #
 # Secrets necessários no environment "AAB Generator"
 # (Settings → Environments → AAB Generator → Environment secrets):
@@ -7,11 +10,22 @@
 #   ANDROID_KEYSTORE_PASSWORD - senha do keystore (storePassword)
 #   ANDROID_KEY_ALIAS         - alias da chave (keyAlias)
 #   ANDROID_KEY_PASSWORD      - senha da chave (keyPassword)
+#   PLAY_SERVICE_ACCOUNT_JSON - JSON da conta de serviço com acesso ao app no Play Console
 name: Android release (AAB)
 
 on:
   push:
   workflow_dispatch:
+    inputs:
+      track:
+        description: Trilha do Google Play
+        type: choice
+        default: internal
+        options:
+          - internal
+          - alpha
+          - production
+          - nenhuma (só gerar o .aab)
 
 permissions:
   contents: read
@@ -25,6 +39,10 @@ env:
   # O versionCode precisa aumentar a cada envio ao Google Play. Ele é gerado a
   # partir do número da execução, somado a um valor acima dos já publicados.
   VERSION_CODE_OFFSET: 1000
+  PACKAGE_NAME: com.household_expense_control
+  # Trilha onde publicar: a escolhida na execução manual, "internal" em push na
+  # main e vazia (não publica) nas demais branches.
+  PLAY_TRACK: ${{ github.event_name == 'workflow_dispatch' && inputs.track || (github.ref == 'refs/heads/main' && 'internal' || '') }}
 
 jobs:
   build:
@@ -133,6 +151,37 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 30
+
+      - name: Preparar notas da versão
+        id: play
+        if: env.PLAY_TRACK == 'internal' || env.PLAY_TRACK == 'alpha' || env.PLAY_TRACK == 'production'
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          HAS_SERVICE_ACCOUNT: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
+        run: |
+          if [ "$HAS_SERVICE_ACCOUNT" != "true" ]; then
+            echo "::error::Secret PLAY_SERVICE_ACCOUNT_JSON não configurado no environment."
+            exit 1
+          fi
+          # O Google Play aceita até 500 caracteres por idioma.
+          mkdir -p "$RUNNER_TEMP/whatsnew"
+          notes="${COMMIT_MESSAGE:-$(git log -1 --pretty=%B)}"
+          printf '%s' "$notes" | head -c 500 > "$RUNNER_TEMP/whatsnew/whatsnew-pt-BR"
+          echo "dir=$RUNNER_TEMP/whatsnew" >> "$GITHUB_OUTPUT"
+          echo "Publicando no Google Play, trilha: $PLAY_TRACK"
+
+      - name: Publicar no Google Play
+        if: steps.play.outcome == 'success'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.PACKAGE_NAME }}
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          mappingFile: build/app/outputs/mapping/release/mapping.txt
+          releaseName: ${{ steps.build.outputs.name }}
+          track: ${{ env.PLAY_TRACK }}
+          status: completed
+          whatsNewDirectory: ${{ steps.play.outputs.dir }}
 
       - name: Remover keystore
         if: always()
