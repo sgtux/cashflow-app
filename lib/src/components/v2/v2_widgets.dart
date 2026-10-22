@@ -186,13 +186,17 @@ class TipCard extends StatelessWidget {
       required this.icon,
       required this.title,
       required this.message,
-      this.isWarning = false})
+      this.isWarning = false,
+      this.actionLabel,
+      this.onAction})
       : super(key: key);
 
   final IconData icon;
   final String title;
   final String message;
   final bool isWarning;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -221,6 +225,15 @@ class TipCard extends StatelessWidget {
                 Text(message,
                     style: theme.textTheme.bodyMedium
                         ?.copyWith(color: foreground)),
+                if (actionLabel != null)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      style: TextButton.styleFrom(foregroundColor: foreground),
+                      onPressed: onAction,
+                      child: Text(actionLabel!),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -509,5 +522,167 @@ class BottomActionBar extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Situação de um item: concluído, pendente ou encerrado.
+enum StatusTone { done, pending, inactive }
+
+/// Etiqueta curta e colorida com a situação de um item.
+class StatusChip extends StatelessWidget {
+  const StatusChip(this.label, {Key? key, required this.tone})
+      : super(key: key);
+
+  final String label;
+  final StatusTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final color = tone == StatusTone.done
+        ? scheme.primary
+        : tone == StatusTone.pending
+            ? warningColor(theme)
+            : scheme.onSurfaceVariant;
+    final icon = tone == StatusTone.done
+        ? Icons.check_circle_rounded
+        : tone == StatusTone.pending
+            ? Icons.schedule_rounded
+            : Icons.block_rounded;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall
+                    ?.copyWith(color: color, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Barra de progresso arredondada.
+class V2ProgressBar extends StatelessWidget {
+  const V2ProgressBar({Key? key, required this.value, this.color})
+      : super(key: key);
+
+  final double value;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: LinearProgressIndicator(
+        value: value.clamp(0, 1).toDouble(),
+        minHeight: 8,
+        color: color ?? scheme.primary,
+        backgroundColor: scheme.surfaceContainerHighest,
+      ),
+    );
+  }
+}
+
+/// Mensagem rápida no rodapé, para confirmar uma ação.
+void showSuccess(BuildContext context, String message) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
+}
+
+/// Abre o calendário com o tema das telas v2.
+Future<DateTime?> pickDate(BuildContext context, DateTime? initial) {
+  final now = DateTime.now();
+  return showDatePicker(
+    context: context,
+    initialDate: initial ?? now,
+    firstDate: DateTime(now.year - 10),
+    lastDate: DateTime(now.year + 10),
+  );
+}
+
+/// Campo de data somente leitura que abre o calendário ao tocar. Com
+/// [clearable], mostra um botão para apagar a data.
+class DateFormField extends StatelessWidget {
+  const DateFormField(
+      {Key? key,
+      required this.label,
+      required this.value,
+      required this.onChanged,
+      this.helperText,
+      this.clearable = false,
+      this.validator})
+      : super(key: key);
+
+  final String label;
+  final DateTime? value;
+  final ValueChanged<DateTime?> onChanged;
+  final String? helperText;
+  final bool clearable;
+  final FormFieldValidator<DateTime>? validator;
+
+  @override
+  Widget build(BuildContext context) {
+    return FormField<DateTime>(
+      initialValue: value,
+      validator: validator == null ? null : (_) => validator!(value),
+      builder: (field) => InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () async {
+          final date = await pickDate(context, value);
+          if (date != null) onChanged(date);
+        },
+        child: InputDecorator(
+          isEmpty: value == null,
+          decoration: InputDecoration(
+            labelText: label,
+            helperText: helperText,
+            helperMaxLines: 3,
+            errorText: field.errorText,
+            prefixIcon: const Icon(Icons.calendar_today_outlined),
+            suffixIcon: clearable && value != null
+                ? IconButton(
+                    tooltip: 'Limpar data',
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => onChanged(null),
+                  )
+                : null,
+          ),
+          child: Text(
+              value == null ? '' : toDateString(value: value, separator: '/')),
+        ),
+      ),
+    );
+  }
+}
+
+/// Cabeçalho de uma tela aberta a partir do menu, com descrição curta.
+class ScreenIntro extends StatelessWidget {
+  const ScreenIntro(this.text, {Key? key}) : super(key: key);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(text,
+        style: theme.textTheme.bodyMedium
+            ?.copyWith(color: theme.colorScheme.onSurfaceVariant));
   }
 }

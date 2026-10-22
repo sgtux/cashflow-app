@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/components/v2/v2_menu.dart';
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/pages/household_expense_list.dart';
 import 'package:cashflow_app/src/pages/household_expense_list_v2.dart';
@@ -59,6 +60,12 @@ class _HomeState extends State<Home> {
         final isV2 = AppSettings.screensVersion.value == 2;
 
         return Scaffold(
+          drawer: isV2
+              ? Theme(
+                  data: theme,
+                  child: V2Menu(currentTab: _index, onSelectTab: _incrementTap),
+                )
+              : null,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(kToolbarHeight),
             child: Theme(

@@ -1,5 +1,17 @@
+import 'package:cashflow_app/src/models/recurring/recurring_model.dart';
+import 'package:cashflow_app/src/pages/account_v2.screen.dart';
+import 'package:cashflow_app/src/pages/credit-card/credit_card_detail_v2.screen.dart';
+import 'package:cashflow_app/src/pages/credit-card/credit_card_list_v2.screen.dart';
+import 'package:cashflow_app/src/pages/earning/earning_detail_v2.screen.dart';
+import 'package:cashflow_app/src/pages/earning/earning_list_v2.screen.dart';
+import 'package:cashflow_app/src/pages/glossary_v2.screen.dart';
 import 'package:cashflow_app/src/pages/household_expense_detail.dart';
 import 'package:cashflow_app/src/pages/household_expense_detail_v2.dart';
+import 'package:cashflow_app/src/pages/payment/payment_detail_v2.screen.dart';
+import 'package:cashflow_app/src/pages/payment/payment_list_v2.screen.dart';
+import 'package:cashflow_app/src/pages/recurring/recurring_detail_v2.screen.dart';
+import 'package:cashflow_app/src/pages/recurring/recurring_list_v2.screen.dart';
+import 'package:cashflow_app/src/pages/remaining_balance_v2.screen.dart';
 import 'package:cashflow_app/src/pages/splash_screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/fuel_expense_detail.screen.dart';
 import 'package:cashflow_app/src/pages/vehicle/fuel_expense_detail_v2.screen.dart';
@@ -51,6 +63,21 @@ class MyApp extends StatelessWidget {
         Routes.fuelExpenseDetail: (context) => _isV2
             ? const FuelExpenseDetailV2Screen()
             : const FuelExpenseDetailScreen(),
+        // Funcionalidades que só existem no novo visual (menu lateral da v2).
+        Routes.earningList: (context) => const EarningListV2Screen(),
+        Routes.earningDetail: (context) => const EarningDetailV2Screen(),
+        Routes.recurringEarningList: (context) =>
+            const RecurringListV2Screen(kind: RecurringKind.earning),
+        Routes.recurringExpenseList: (context) =>
+            const RecurringListV2Screen(kind: RecurringKind.expense),
+        Routes.recurringDetail: (context) => const RecurringDetailV2Screen(),
+        Routes.paymentList: (context) => const PaymentListV2Screen(),
+        Routes.paymentDetail: (context) => const PaymentDetailV2Screen(),
+        Routes.creditCardList: (context) => const CreditCardListV2Screen(),
+        Routes.creditCardDetail: (context) => const CreditCardDetailV2Screen(),
+        Routes.remainingBalance: (context) => const RemainingBalanceV2Screen(),
+        Routes.account: (context) => const AccountV2Screen(),
+        Routes.glossary: (context) => const GlossaryV2Screen(),
       },
     );
   }
