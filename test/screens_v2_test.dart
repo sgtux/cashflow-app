@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/models/credit-card/credit_card_model.dart';
 import 'package:cashflow_app/src/models/home/home_data_model.dart';
 import 'package:cashflow_app/src/models/home/home_description_value.dart';
 import 'package:cashflow_app/src/models/home/home_limit_value.dart';
@@ -51,7 +52,9 @@ List<HouseholdExpenseModel> sampleExpenses() => [
           value: 650.4,
           date: DateTime(now.year, now.month, 3),
           type: 20,
-          typeDescription: 'Alimentação'),
+          typeDescription: 'Alimentação',
+          creditCardId: 1,
+          creditCardName: 'Nubank'),
       HouseholdExpenseModel(
           id: 2,
           description: 'Troca de óleo',
@@ -78,7 +81,9 @@ FuelExpenseModel fuel(int id, int vehicleId, String name, DateTime date) =>
         pricePerLiter: 5.89,
         date: date,
         vehicleId: vehicleId,
-        vehicleName: name);
+        vehicleName: name,
+        creditCardId: id == 1 ? 1 : null,
+        creditCardName: id == 1 ? 'Nubank' : null);
 
 List<VehicleModel> sampleVehicles() => [
       VehicleModel(
@@ -97,6 +102,11 @@ List<VehicleModel> sampleVehicles() => [
           miliagePerLiter: 0,
           fuelExpenses: [fuel(3, 2, 'Moto CG 160', now)]),
     ];
+
+final creditCards = [
+  CreditCardModel(id: 1, name: 'Nubank'),
+  CreditCardModel(id: 2, name: 'Itaú'),
+];
 
 final types = [
   TypeModel(id: 6, description: 'Veículo'),
@@ -159,6 +169,7 @@ void main() {
                 loadExpenses: (_, __, ___) async => sampleExpenses()));
         expect(find.text('Para onde foi o dinheiro'), findsOneWidget);
         await scrollTo(tester, find.text('Mercado do mês'));
+        expect(find.text('Nubank'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
 
@@ -193,18 +204,25 @@ void main() {
           HouseholdExpenseDetailV2(
             loadTypes: (_) async => types,
             loadVehicles: (_) async => sampleVehicles(),
+            loadCreditCards: (_) async => creditCards,
           ),
           arguments: sampleExpenses()[1],
         );
         expect(find.text('Editar despesa'), findsOneWidget);
         expect(find.text('Veículo'), findsWidgets);
+        expect(find.text('Pagou no cartão de crédito?'), findsOneWidget);
+        expect(find.text('Não (dinheiro, Pix ou débito)'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
 
       testWidgets('Formulário de abastecimento v2 $suffix', (tester) async {
         AppSettings.themeModeV2.value = mode;
         final vehicles = sampleVehicles();
-        await pumpScreen(tester, entry.value, const FuelExpenseDetailV2Screen(),
+        await pumpScreen(
+            tester,
+            entry.value,
+            FuelExpenseDetailV2Screen(
+                loadCreditCards: (_) async => creditCards),
             arguments: {
               'vehicles': vehicles,
               'fuelExpenseModel': vehicles.first.fuelExpenses.first,
@@ -212,6 +230,8 @@ void main() {
         expect(find.text('Editar abastecimento'), findsOneWidget);
         expect(
             find.textContaining('Aproximadamente 42,4 litros'), findsOneWidget);
+        await scrollTo(tester, find.text('Pagou no cartão de crédito?'));
+        expect(find.text('Nubank'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
 
@@ -261,5 +281,20 @@ void main() {
     await pumpScreen(tester, const Size(412, 915),
         VehicleListV2Screen(loadVehicles: (_) async => []));
     expect(find.text('Nenhum veículo cadastrado'), findsOneWidget);
+  });
+
+  testWidgets('Formulário de despesa v2 esconde o cartão sem cartões',
+      (tester) async {
+    await pumpScreen(
+      tester,
+      const Size(412, 915),
+      HouseholdExpenseDetailV2(
+        loadTypes: (_) async => types,
+        loadVehicles: (_) async => [],
+        loadCreditCards: (_) async => [],
+      ),
+    );
+    expect(find.text('Nova despesa'), findsOneWidget);
+    expect(find.text('Pagou no cartão de crédito?'), findsNothing);
   });
 }

@@ -201,7 +201,9 @@ class _FuelExpenseDetailScreenState extends State<FuelExpenseDetailScreen> {
                                               date: DateFormat('dd/MM/yyyy')
                                                   .parse(dateController.text),
                                               vehicleName:
-                                                  fuelExpense!.vehicleName);
+                                                  fuelExpense!.vehicleName,
+                                              creditCardId:
+                                                  fuelExpense!.creditCardId);
                                           _fuelExpenseService
                                               .save(model)
                                               .then((value) {

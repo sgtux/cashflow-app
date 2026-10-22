@@ -210,7 +210,9 @@ class _HouseholdExpenseDetailState extends State<HouseholdExpenseDetail> {
                                                   valueController.numberValue,
                                               date: DateFormat('dd/MM/yyyy')
                                                   .parse(dateController.text),
-                                              type: selectedType!.id);
+                                              type: selectedType!.id,
+                                              creditCardId: householdExpense!
+                                                  .creditCardId);
 
                                           if (selectedVehicle != null) {
                                             model.vehicleId =

@@ -467,6 +467,8 @@ class _FuelTile extends StatelessWidget {
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: scheme.onSurfaceVariant),
                 ),
+                if ((fuel.creditCardName ?? '').isNotEmpty)
+                  CreditCardLabel(fuel.creditCardName!),
               ],
             ),
           ),

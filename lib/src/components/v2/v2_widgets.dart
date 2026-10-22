@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/models/credit-card/credit_card_model.dart';
 import 'package:cashflow_app/src/utils/app_settings.dart';
 import 'package:cashflow_app/src/utils/app_theme.dart';
 import 'package:cashflow_app/src/utils/string_extensions.dart';
@@ -360,6 +361,68 @@ class CircleIcon extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: Icon(icon, size: size * 0.5, color: color),
+    );
+  }
+}
+
+/// Escolha do cartão de crédito usado no pagamento. O valor `0` significa
+/// que não foi no cartão.
+class CreditCardField extends StatelessWidget {
+  const CreditCardField(
+      {Key? key,
+      required this.cards,
+      required this.value,
+      required this.onChanged})
+      : super(key: key);
+
+  final List<CreditCardModel> cards;
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<int>(
+      initialValue: cards.any((c) => c.id == value) ? value : 0,
+      isExpanded: true,
+      decoration: const InputDecoration(
+        labelText: 'Pagou no cartão de crédito?',
+        prefixIcon: Icon(Icons.credit_card_outlined),
+        helperText: 'No cartão, o valor só sai do seu bolso quando a fatura '
+            'vencer.',
+        helperMaxLines: 2,
+      ),
+      items: [
+        const DropdownMenuItem(
+            value: 0, child: Text('Não (dinheiro, Pix ou débito)')),
+        ...cards.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))),
+      ],
+      onChanged: (id) => onChanged(id ?? 0),
+    );
+  }
+}
+
+/// Indica, nos itens de lista, o cartão de crédito usado no pagamento.
+class CreditCardLabel extends StatelessWidget {
+  const CreditCardLabel(this.name, {Key? key}) : super(key: key);
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.onSurfaceVariant;
+
+    return Row(
+      children: [
+        Icon(Icons.credit_card_rounded, size: 14, color: color),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(color: color)),
+        ),
+      ],
     );
   }
 }

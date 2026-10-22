@@ -360,6 +360,8 @@ class _ExpenseTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: scheme.onSurfaceVariant)),
+                if ((expense.creditCardName ?? '').isNotEmpty)
+                  CreditCardLabel(expense.creditCardName!),
               ],
             ),
           ),

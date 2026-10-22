@@ -1,6 +1,8 @@
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
+import 'package:cashflow_app/src/models/credit-card/credit_card_model.dart';
 import 'package:cashflow_app/src/models/vehicle/fuel_expense.model.dart';
 import 'package:cashflow_app/src/models/vehicle/vehicle.model.dart';
+import 'package:cashflow_app/src/services/credit_card.service.dart';
 import 'package:cashflow_app/src/services/fuel_expense.service.dart';
 import 'package:cashflow_app/src/utils/exception_handler.dart';
 import 'package:cashflow_app/src/utils/flutter_masked_text.dart';
@@ -11,16 +13,26 @@ import 'package:flutter/services.dart';
 /// Novo formulário de abastecimento. Recebe pela rota um mapa com
 /// `vehicles` (`List<VehicleModel>`) e `fuelExpenseModel` (`FuelExpenseModel`).
 class FuelExpenseDetailV2Screen extends StatelessWidget {
-  const FuelExpenseDetailV2Screen({Key? key}) : super(key: key);
+  const FuelExpenseDetailV2Screen({Key? key, this.loadCreditCards})
+      : super(key: key);
+
+  /// Permite substituir a busca na API (usado nos testes).
+  final Future<List<CreditCardModel>> Function(BuildContext context)?
+      loadCreditCards;
 
   @override
   Widget build(BuildContext context) {
-    return const V2Theme(child: _FuelExpenseDetailV2Body());
+    return V2Theme(
+        child: _FuelExpenseDetailV2Body(loadCreditCards: loadCreditCards));
   }
 }
 
 class _FuelExpenseDetailV2Body extends StatefulWidget {
-  const _FuelExpenseDetailV2Body({Key? key}) : super(key: key);
+  const _FuelExpenseDetailV2Body({Key? key, required this.loadCreditCards})
+      : super(key: key);
+
+  final Future<List<CreditCardModel>> Function(BuildContext context)?
+      loadCreditCards;
 
   @override
   State<_FuelExpenseDetailV2Body> createState() =>
@@ -39,6 +51,8 @@ class _FuelExpenseDetailV2BodyState extends State<_FuelExpenseDetailV2Body> {
   FuelExpenseModel? _fuel;
   List<VehicleModel> _vehicles = [];
   VehicleModel? _selectedVehicle;
+  List<CreditCardModel> _cards = [];
+  int _creditCardId = 0;
   DateTime _date = DateTime.now();
   bool _isSaving = false;
 
@@ -49,6 +63,18 @@ class _FuelExpenseDetailV2BodyState extends State<_FuelExpenseDetailV2Body> {
     super.initState();
     _pricePerLiterController.addListener(_refreshLiters);
     _valueSuppliedController.addListener(_refreshLiters);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCreditCards());
+  }
+
+  /// Sem os cartões o formulário ainda funciona, só não oferece a opção.
+  Future<void> _loadCreditCards() async {
+    try {
+      final cards = await (widget.loadCreditCards ??
+          (BuildContext c) => CreditCardService(c).getAll())(context);
+      if (mounted) setState(() => _cards = cards);
+    } catch (error) {
+      debugPrint('[Abastecimento] Erro ao carregar cartões: $error');
+    }
   }
 
   @override
@@ -70,6 +96,7 @@ class _FuelExpenseDetailV2BodyState extends State<_FuelExpenseDetailV2Body> {
     _miliageController.text = fuel.miliage > 0 ? fuel.miliage.toString() : '';
     _pricePerLiterController.updateValue(fuel.pricePerLiter.toDouble());
     _valueSuppliedController.updateValue(fuel.valueSupplied.toDouble());
+    _creditCardId = fuel.creditCardId ?? 0;
     _setDate(fuel.date);
   }
 
@@ -112,6 +139,7 @@ class _FuelExpenseDetailV2BodyState extends State<_FuelExpenseDetailV2Body> {
       valueSupplied: _valueSuppliedController.numberValue,
       date: _date,
       vehicleName: _selectedVehicle!.description,
+      creditCardId: _creditCardId > 0 ? _creditCardId : null,
     );
 
     setState(() => _isSaving = true);
@@ -208,6 +236,14 @@ class _FuelExpenseDetailV2BodyState extends State<_FuelExpenseDetailV2Body> {
                       prefixIcon: Icon(Icons.calendar_today_outlined),
                     ),
                   ),
+                  if (_cards.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    CreditCardField(
+                      cards: _cards,
+                      value: _creditCardId,
+                      onChanged: (id) => setState(() => _creditCardId = id),
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   const TipCard(
                     icon: Icons.lightbulb_outline_rounded,

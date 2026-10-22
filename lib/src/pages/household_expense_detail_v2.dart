@@ -1,7 +1,9 @@
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
+import 'package:cashflow_app/src/models/credit-card/credit_card_model.dart';
 import 'package:cashflow_app/src/models/household-expense/household_expense_model.dart';
 import 'package:cashflow_app/src/models/type_model.dart';
 import 'package:cashflow_app/src/models/vehicle/vehicle.model.dart';
+import 'package:cashflow_app/src/services/credit_card.service.dart';
 import 'package:cashflow_app/src/services/household_expense.service.dart';
 import 'package:cashflow_app/src/services/vehicle.service.dart';
 import 'package:cashflow_app/src/utils/exception_handler.dart';
@@ -17,29 +19,39 @@ const int defaultExpenseTypeId = 20;
 
 /// Novo formulário de despesa doméstica.
 class HouseholdExpenseDetailV2 extends StatelessWidget {
-  const HouseholdExpenseDetailV2({Key? key, this.loadTypes, this.loadVehicles})
+  const HouseholdExpenseDetailV2(
+      {Key? key, this.loadTypes, this.loadVehicles, this.loadCreditCards})
       : super(key: key);
 
   /// Permitem substituir a busca na API (usados nos testes).
   final Future<List<TypeModel>> Function(BuildContext context)? loadTypes;
   final Future<List<VehicleModel>> Function(BuildContext context)? loadVehicles;
+  final Future<List<CreditCardModel>> Function(BuildContext context)?
+      loadCreditCards;
 
   @override
   Widget build(BuildContext context) {
     return V2Theme(
       child: _HouseholdExpenseDetailV2Body(
-          loadTypes: loadTypes, loadVehicles: loadVehicles),
+          loadTypes: loadTypes,
+          loadVehicles: loadVehicles,
+          loadCreditCards: loadCreditCards),
     );
   }
 }
 
 class _HouseholdExpenseDetailV2Body extends StatefulWidget {
   const _HouseholdExpenseDetailV2Body(
-      {Key? key, required this.loadTypes, required this.loadVehicles})
+      {Key? key,
+      required this.loadTypes,
+      required this.loadVehicles,
+      required this.loadCreditCards})
       : super(key: key);
 
   final Future<List<TypeModel>> Function(BuildContext context)? loadTypes;
   final Future<List<VehicleModel>> Function(BuildContext context)? loadVehicles;
+  final Future<List<CreditCardModel>> Function(BuildContext context)?
+      loadCreditCards;
 
   @override
   State<_HouseholdExpenseDetailV2Body> createState() =>
@@ -58,8 +70,10 @@ class _HouseholdExpenseDetailV2BodyState
   DateTime _date = DateTime.now();
   List<TypeModel> _types = [];
   List<VehicleModel> _vehicles = [];
+  List<CreditCardModel> _cards = [];
   TypeModel? _selectedType;
   VehicleModel? _selectedVehicle;
+  int _creditCardId = 0;
   bool _isLoading = true;
   bool _isSaving = false;
 
@@ -97,8 +111,16 @@ class _HouseholdExpenseDetailV2BodyState
           (BuildContext c) => HouseholdExpenseService(c).getTypes())(context);
       final vehiclesTask = (widget.loadVehicles ??
           (BuildContext c) => VehicleService(c).getAll())(context);
+      // Sem os cartões o formulário ainda funciona, só não oferece a opção.
+      final cardsTask = (widget.loadCreditCards ??
+              (BuildContext c) => CreditCardService(c).getAll())(context)
+          .catchError((Object error) {
+        debugPrint('[Despesa] Erro ao carregar cartões: $error');
+        return <CreditCardModel>[];
+      });
       final types = await typesTask;
       final vehicles = await vehiclesTask;
+      final cards = await cardsTask;
       if (!mounted) return;
 
       _descriptionController.text = expense.description;
@@ -109,6 +131,8 @@ class _HouseholdExpenseDetailV2BodyState
         _expense = expense;
         _types = types;
         _vehicles = vehicles;
+        _cards = cards;
+        _creditCardId = expense.creditCardId ?? 0;
         _selectedType = _firstOrNull(types.where((t) => t.id == expense.type));
         _selectedVehicle =
             _firstOrNull(vehicles.where((v) => v.id == expense.vehicleId));
@@ -150,6 +174,7 @@ class _HouseholdExpenseDetailV2BodyState
       date: _date,
       type: _selectedType!.id,
       vehicleId: _needsVehicle ? _selectedVehicle?.id : null,
+      creditCardId: _creditCardId > 0 ? _creditCardId : null,
     );
 
     setState(() => _isSaving = true);
@@ -243,6 +268,14 @@ class _HouseholdExpenseDetailV2BodyState
                           setState(() => _selectedVehicle = vehicle),
                       validator: (vehicle) =>
                           vehicle == null ? 'Escolha o veículo' : null,
+                    ),
+                  ],
+                  if (_cards.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    CreditCardField(
+                      cards: _cards,
+                      value: _creditCardId,
+                      onChanged: (id) => setState(() => _creditCardId = id),
                     ),
                   ],
                   const SizedBox(height: 20),
