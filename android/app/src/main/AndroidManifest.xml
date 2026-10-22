@@ -2,7 +2,7 @@
     package="com.household_expense_control">
   <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="Controlador de Despesas Domésticas"
+        android:label="Bê-a-bá da Grana"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

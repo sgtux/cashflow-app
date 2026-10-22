@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Cashflow App',
+      title: 'Bê-a-bá da Grana',
       theme: ThemeData(primarySwatch: Colors.green),
       initialRoute: Routes.splash,
       routes: {

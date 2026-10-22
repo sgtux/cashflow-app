@@ -30,7 +30,7 @@ class _LoginState extends State<Login> {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Cashflow"),
+          title: const Text("Bê-a-bá da Grana"),
         ),
         body: Center(
             child: Container(

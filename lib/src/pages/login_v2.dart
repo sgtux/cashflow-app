@@ -207,7 +207,7 @@ class _LoginV2BodyState extends State<_LoginV2Body> {
         ),
         const SizedBox(height: 20),
         Text(
-          'Bem-vindo ao Cashflow',
+          'Bem-vindo ao Bê-a-bá da Grana',
           textAlign: TextAlign.center,
           style: theme.textTheme.headlineSmall
               ?.copyWith(fontWeight: FontWeight.bold),

@@ -94,7 +94,7 @@ class V2Menu extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(28, 16, 16, 8),
-              child: Text('CASHFLOW',
+              child: Text('Bê-a-bá da Grana',
                   style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold, color: scheme.primary)),
             ),

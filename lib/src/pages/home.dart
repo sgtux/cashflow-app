@@ -71,7 +71,7 @@ class _HomeState extends State<Home> {
             child: Theme(
               data: theme,
               child: AppBar(
-                title: const Text("CASHFLOW"),
+                title: const Text("Bê-a-bá"),
                 actions: [
                   IconButton(
                     tooltip: isDark ? 'Usar tema claro' : 'Usar tema escuro',
