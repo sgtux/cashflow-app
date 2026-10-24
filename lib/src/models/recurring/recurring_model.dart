@@ -17,6 +17,9 @@ extension RecurringKindApi on RecurringKind {
       ? 'recurringEarningId'
       : 'recurringExpenseId';
 
+  /// Tipo "Outros" da API, tanto para ganhos quanto para despesas.
+  int get defaultType => 20;
+
   /// Campo que indica se já foi recebido/pago no mês atual.
   String get doneKey => this == RecurringKind.earning ? 'received' : 'paid';
 }
@@ -32,6 +35,10 @@ class RecurringModel extends ModelBase {
   final int? creditCardId;
   final String? creditCardName;
 
+  /// Tipo de ganho (`EarningType`) ou de despesa (`ExpenseType`) na API.
+  final int? type;
+  final String? typeDescription;
+
   /// Recebido/pago no mês atual.
   final bool done;
 
@@ -46,6 +53,8 @@ class RecurringModel extends ModelBase {
       this.inactiveAt,
       this.creditCardId,
       this.creditCardName,
+      this.type,
+      this.typeDescription,
       this.done = false,
       this.history = const []});
 
@@ -65,6 +74,8 @@ class RecurringModel extends ModelBase {
         inactiveAt: asDate(map['inactiveAt']),
         creditCardId: map['creditCardId'] ?? card?['id'],
         creditCardName: card?['name'],
+        type: map['type'],
+        typeDescription: map['typeDescription'],
         done: map[kind.doneKey] ?? false,
         history: history);
   }
@@ -76,6 +87,7 @@ class RecurringModel extends ModelBase {
       'description': description,
       'value': value,
       'inactiveAt': inactiveAt?.toIso8601String(),
+      'type': type ?? kind.defaultType,
       if (kind == RecurringKind.expense) 'creditCardId': creditCardId,
     };
   }

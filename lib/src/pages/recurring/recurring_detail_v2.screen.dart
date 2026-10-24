@@ -1,8 +1,11 @@
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/credit-card/credit_card_model.dart';
 import 'package:cashflow_app/src/models/recurring/recurring_model.dart';
+import 'package:cashflow_app/src/models/type_model.dart';
 import 'package:cashflow_app/src/pages/recurring/recurring_texts.dart';
 import 'package:cashflow_app/src/services/credit_card.service.dart';
+import 'package:cashflow_app/src/services/earning.service.dart';
+import 'package:cashflow_app/src/services/household_expense.service.dart';
 import 'package:cashflow_app/src/services/recurring.service.dart';
 import 'package:cashflow_app/src/utils/exception_handler.dart';
 import 'package:cashflow_app/src/utils/flutter_masked_text.dart';
@@ -12,26 +15,31 @@ import 'package:flutter/material.dart';
 /// Formulário de ganho fixo ou conta fixa, com o histórico mês a mês.
 /// Recebe o [RecurringModel] como argumento da rota (com `id` 0 para criar).
 class RecurringDetailV2Screen extends StatelessWidget {
-  const RecurringDetailV2Screen({Key? key, this.loadCreditCards})
+  const RecurringDetailV2Screen(
+      {Key? key, this.loadCreditCards, this.loadTypes})
       : super(key: key);
 
-  /// Permite substituir a busca na API (usado nos testes).
+  /// Permitem substituir a busca na API (usado nos testes).
   final Future<List<CreditCardModel>> Function(BuildContext context)?
       loadCreditCards;
+  final Future<List<TypeModel>> Function(BuildContext context)? loadTypes;
 
   @override
   Widget build(BuildContext context) {
     return V2Theme(
-        child: _RecurringDetailV2Body(loadCreditCards: loadCreditCards));
+        child: _RecurringDetailV2Body(
+            loadCreditCards: loadCreditCards, loadTypes: loadTypes));
   }
 }
 
 class _RecurringDetailV2Body extends StatefulWidget {
-  const _RecurringDetailV2Body({Key? key, required this.loadCreditCards})
+  const _RecurringDetailV2Body(
+      {Key? key, required this.loadCreditCards, required this.loadTypes})
       : super(key: key);
 
   final Future<List<CreditCardModel>> Function(BuildContext context)?
       loadCreditCards;
+  final Future<List<TypeModel>> Function(BuildContext context)? loadTypes;
 
   @override
   State<_RecurringDetailV2Body> createState() => _RecurringDetailV2BodyState();
@@ -46,6 +54,8 @@ class _RecurringDetailV2BodyState extends State<_RecurringDetailV2Body> {
   late RecurringModel _item;
   List<CreditCardModel> _cards = [];
   int _creditCardId = 0;
+  List<TypeModel> _types = [];
+  late int _type;
   DateTime? _inactiveAt;
   bool _initialized = false;
   bool _isSaving = false;
@@ -64,6 +74,8 @@ class _RecurringDetailV2BodyState extends State<_RecurringDetailV2Body> {
     _valueController.updateValue(_item.value);
     _creditCardId = _item.creditCardId ?? 0;
     _inactiveAt = _item.inactiveAt;
+    _type = _item.type ?? _kind.defaultType;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadTypes());
     if (_kind == RecurringKind.expense) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadCards());
     }
@@ -74,6 +86,18 @@ class _RecurringDetailV2BodyState extends State<_RecurringDetailV2Body> {
     _descriptionController.dispose();
     _valueController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadTypes() async {
+    try {
+      final types = await (widget.loadTypes ??
+          (BuildContext c) => _kind == RecurringKind.earning
+              ? EarningService(c).getTypes()
+              : HouseholdExpenseService(c).getTypes())(context);
+      if (mounted) setState(() => _types = types);
+    } catch (error) {
+      if (mounted) handleHttpException(error, context);
+    }
   }
 
   Future<void> _loadCards() async {
@@ -107,6 +131,7 @@ class _RecurringDetailV2BodyState extends State<_RecurringDetailV2Body> {
       value: _valueController.numberValue,
       inactiveAt: _inactiveAt,
       creditCardId: _creditCardId > 0 ? _creditCardId : null,
+      type: _type,
     );
 
     setState(() => _isSaving = true);
@@ -198,6 +223,26 @@ class _RecurringDetailV2BodyState extends State<_RecurringDetailV2Body> {
                   ? 'Informe um valor maior que zero'
                   : null,
             ),
+            if (_types.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              DropdownButtonFormField<int>(
+                initialValue: _types.any((t) => t.id == _type) ? _type : null,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: _texts.typeLabel,
+                  prefixIcon: const Icon(Icons.category_outlined),
+                  helperText: _texts.typeHelper,
+                  helperMaxLines: 2,
+                ),
+                items: _types
+                    .map((t) => DropdownMenuItem(
+                        value: t.id, child: Text(t.description)))
+                    .toList(),
+                onChanged: (id) =>
+                    setState(() => _type = id ?? _kind.defaultType),
+                validator: (id) => id == null ? 'Escolha o tipo' : null,
+              ),
+            ],
             if (_cards.isNotEmpty) ...[
               const SizedBox(height: 12),
               DropdownButtonFormField<int>(

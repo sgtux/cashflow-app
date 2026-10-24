@@ -13,6 +13,8 @@ class RecurringTexts {
   final String descriptionHint;
   final String valueLabel;
   final String valueHelper;
+  final String typeLabel;
+  final String typeHelper;
   final String done;
   final String pending;
   final String inactive;
@@ -40,6 +42,8 @@ class RecurringTexts {
       required this.descriptionHint,
       required this.valueLabel,
       required this.valueHelper,
+      required this.typeLabel,
+      required this.typeHelper,
       required this.done,
       required this.pending,
       required this.inactive,
@@ -72,6 +76,9 @@ class RecurringTexts {
     valueLabel: 'Quanto costuma receber por mês?',
     valueHelper:
         'Uma estimativa. Se vier diferente em algum mês, ajuste no histórico.',
+    typeLabel: 'Tipo de ganho',
+    typeHelper: 'Separar por tipo mostra quanto vem do seu trabalho e quanto '
+        'vem do seu patrimônio.',
     done: 'Recebido este mês',
     pending: 'Ainda não recebido',
     inactive: 'Encerrado',
@@ -105,6 +112,8 @@ class RecurringTexts {
     descriptionHint: 'Ex.: Aluguel, Internet, Conta de luz',
     valueLabel: 'Quanto costuma custar por mês?',
     valueHelper: 'Se o valor muda (como a conta de luz), use uma média.',
+    typeLabel: 'Tipo de gasto',
+    typeHelper: 'Separar por tipo mostra em que você mais gasta.',
     done: 'Paga este mês',
     pending: 'A pagar',
     inactive: 'Encerrada',

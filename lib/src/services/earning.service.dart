@@ -1,10 +1,22 @@
 import 'package:cashflow_app/src/models/earning/earning_model.dart';
 import 'package:cashflow_app/src/models/result_model.dart';
+import 'package:cashflow_app/src/models/type_model.dart';
 import 'package:flutter/material.dart';
 import 'http.service.dart';
 
 class EarningService extends HttpService {
   EarningService(BuildContext context) : super(context: context);
+
+  Future<List<TypeModel>> getTypes() async {
+    final result = await get('Earning/Types');
+    List<TypeModel> list = [];
+    if (result.errors.isEmpty && result.data.isNotEmpty) {
+      for (var e in (result.data as List)) {
+        list.add(TypeModel.fromMap(e));
+      }
+    }
+    return list;
+  }
 
   /// Ganhos a partir de [fromDate].
   Future<List<EarningModel>> getSome(DateTime fromDate) async {

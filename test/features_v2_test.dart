@@ -203,8 +203,16 @@ void main() {
 
       testWidgets('Formulário de ganho v2 $suffix', (tester) async {
         AppSettings.themeModeV2.value = mode;
-        await pumpScreen(tester, entry.value, const EarningDetailV2Screen(),
+        await pumpScreen(
+            tester,
+            entry.value,
+            EarningDetailV2Screen(
+                loadTypes: (_) async => [
+                      TypeModel(id: 2, description: 'Freela / Trabalho extra'),
+                      TypeModel(id: 20, description: 'Outros'),
+                    ]),
             arguments: sampleEarnings().first);
+        expect(find.text('Tipo de ganho'), findsOneWidget);
         expect(find.text('Editar ganho'), findsOneWidget);
         expect(find.text('Freela de design com nome bem comprido'),
             findsOneWidget);
@@ -235,8 +243,15 @@ void main() {
               tester,
               entry.value,
               RecurringDetailV2Screen(
-                  loadCreditCards: (_) async => sampleCards()),
+                  loadCreditCards: (_) async => sampleCards(),
+                  loadTypes: (_) async =>
+                      [TypeModel(id: 20, description: 'Outros')]),
               arguments: sampleRecurring(kind));
+          expect(
+              find.text(kind == RecurringKind.earning
+                  ? 'Tipo de ganho'
+                  : 'Tipo de gasto'),
+              findsOneWidget);
           await scrollTo(tester, find.textContaining('1.750,00'));
           if (kind == RecurringKind.expense) {
             expect(

@@ -330,6 +330,12 @@ class _RecurringTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodyLarge),
+                      if ((item.typeDescription ?? '').isNotEmpty)
+                        Text(item.typeDescription!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall
+                                ?.copyWith(color: scheme.onSurfaceVariant)),
                       Text('${money(item.value)} por mês',
                           style: theme.textTheme.bodyMedium?.copyWith(
                               color: color, fontWeight: FontWeight.w600)),

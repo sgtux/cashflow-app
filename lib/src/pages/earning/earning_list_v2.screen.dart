@@ -98,7 +98,8 @@ class _EarningListV2BodyState extends State<_EarningListV2Body> {
         id: 0,
         description: earning.description,
         value: earning.value,
-        date: DateTime(now.year, now.month, day));
+        date: DateTime(now.year, now.month, day),
+        type: earning.type);
 
     setState(() => _isLoading = true);
     try {
@@ -253,7 +254,13 @@ class _EarningListV2BodyState extends State<_EarningListV2Body> {
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodyLarge),
                           Text(
-                              'Recebido em ${toDateString(value: earning.date, separator: '/')}',
+                              [
+                                if ((earning.typeDescription ?? '').isNotEmpty)
+                                  earning.typeDescription!,
+                                'Recebido em ${toDateString(value: earning.date, separator: '/')}',
+                              ].join(' · '),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall
                                   ?.copyWith(color: scheme.onSurfaceVariant)),
                           const SizedBox(height: 2),
