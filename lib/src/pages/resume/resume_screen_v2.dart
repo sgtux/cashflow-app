@@ -129,6 +129,14 @@ class _ResumeV2BodyState extends State<_ResumeV2Body> {
       _BalanceCard(totalIn: totalIn, totalOut: totalOut),
       const SizedBox(height: 12),
       _SavingsTip(totalIn: totalIn, totalOut: totalOut),
+      SectionTitle('Corrida dos ratos',
+          trailing: Text('${(data.passiveIncomeCoverage * 100).round()}%',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: data.outOfRatRace
+                      ? inColor(Theme.of(context).colorScheme)
+                      : null,
+                  fontWeight: FontWeight.bold))),
+      _RatRaceCard(data: data),
       if (data.limitValues.isNotEmpty) ...[
         const SectionTitle('Limites de gastos'),
         ...data.limitValues.map((limit) => Padding(
@@ -339,6 +347,64 @@ class _SavingsTip extends StatelessWidget {
       title: 'Sobrou $percent% da renda',
       message: 'Tente chegar a 10%: revise gastos pequenos e assinaturas que '
           'você quase não usa.',
+    );
+  }
+}
+
+/// Quanto do custo de vida do mês a renda passiva já paga. A partir de 100%,
+/// saiu da corrida dos ratos.
+class _RatRaceCard extends StatelessWidget {
+  const _RatRaceCard({Key? key, required this.data}) : super(key: key);
+
+  final HomeDataModel data;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final passive = data.totalPassiveInflows;
+    final coverage = data.passiveIncomeCoverage;
+    final percent = (coverage * 100).round();
+    final color = data.outOfRatRace ? inColor(scheme) : warningColor(theme);
+
+    final String message;
+    if (data.outOfRatRace) {
+      message = 'Sua renda passiva já paga todo o seu custo de vida do mês. '
+          'Você saiu da corrida dos ratos!';
+    } else if (passive > 0) {
+      message = 'Sua renda passiva de ${money(passive)} cobre $percent% do '
+          'seu custo de vida (as saídas, sem contar os aportes). Faltam '
+          '${money(data.totalLivingCosts - passive)} por mês para sair da '
+          'corrida.';
+    } else {
+      message = 'Nenhuma renda passiva neste mês. Aluguéis, dividendos e '
+          'juros que você recebe aparecem aqui.';
+    }
+
+    return V2Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleIcon(Icons.directions_run_rounded, color: color, size: 32),
+              const SizedBox(width: 12),
+              Expanded(child: Text(message, style: theme.textTheme.bodyMedium)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: coverage.clamp(0, 1).toDouble(),
+              minHeight: 10,
+              color: color,
+              backgroundColor: scheme.surfaceContainerHighest,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

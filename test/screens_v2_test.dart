@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/credit-card/credit_card_model.dart';
 import 'package:cashflow_app/src/models/home/home_data_model.dart';
 import 'package:cashflow_app/src/models/home/home_description_value.dart';
@@ -19,7 +20,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 final now = DateTime.now();
 
-HomeDataModel sampleHomeData({bool overspent = false}) => HomeDataModel(
+HomeDataModel sampleHomeData(
+        {bool overspent = false, bool outOfRatRace = false}) =>
+    HomeDataModel(
       month: now.month,
       year: now.year,
       pendingPayments: [
@@ -35,6 +38,8 @@ HomeDataModel sampleHomeData({bool overspent = false}) => HomeDataModel(
       inflows: [
         HomeDescriptionValue(description: 'Salário', value: 5000),
         HomeDescriptionValue(description: 'Freela', value: 600),
+        HomeDescriptionValue(
+            description: 'Rendimentos FII', value: 700, isPassive: true),
       ],
       outflows: List.generate(
           7,
@@ -43,6 +48,10 @@ HomeDataModel sampleHomeData({bool overspent = false}) => HomeDataModel(
               value: 100.0 * (i + 1))),
       totalInflows: 5600,
       totalOutflows: overspent ? 6400 : 2800,
+      totalPassiveInflows: 700,
+      totalLivingCosts: outOfRatRace ? 700 : 2800,
+      passiveIncomeCoverage: outOfRatRace ? 1 : 0.25,
+      outOfRatRace: outOfRatRace,
     );
 
 List<HouseholdExpenseModel> sampleExpenses() => [
@@ -255,6 +264,54 @@ void main() {
             loadHomeData: (_, __, ___) async =>
                 sampleHomeData(overspent: true)));
     expect(find.text('Saiu mais do que entrou'), findsOneWidget);
+  });
+
+  testWidgets('Resumo v2 mostra quanto falta para sair da corrida dos ratos',
+      (tester) async {
+    await pumpScreen(tester, const Size(412, 915),
+        ResumeScreenV2(loadHomeData: (_, __, ___) async => sampleHomeData()));
+    await scrollTo(tester, find.text('Corrida dos ratos'));
+    expect(find.text('25%'), findsOneWidget);
+    expect(
+        find.textContaining('Faltam ${money(2100)} por mês'), findsOneWidget);
+  });
+
+  testWidgets('Resumo v2 comemora a saída da corrida dos ratos',
+      (tester) async {
+    await pumpScreen(
+        tester,
+        const Size(412, 915),
+        ResumeScreenV2(
+            loadHomeData: (_, __, ___) async =>
+                sampleHomeData(outOfRatRace: true)));
+    await scrollTo(tester, find.text('Corrida dos ratos'));
+    expect(find.text('100%'), findsOneWidget);
+    expect(
+        find.textContaining('Você saiu da corrida dos ratos!'), findsOneWidget);
+  });
+
+  test('Resumo lê a corrida dos ratos vinda da API', () {
+    final home = HomeDataModel.fromMap({
+      'month': 10,
+      'year': 2026,
+      'pendingPayments': [],
+      'limitValues': [],
+      'inflows': [
+        {'description': 'Salário', 'value': 5000, 'isPassive': false},
+        {'description': 'Rendimentos FII', 'value': 300, 'isPassive': true},
+      ],
+      'outflows': [],
+      'totalInflows': 5300,
+      'totalOutflows': 3500,
+      'totalPassiveInflows': 300,
+      'totalLivingCosts': 3000,
+      'passiveIncomeCoverage': 0.1,
+      'outOfRatRace': false,
+    });
+    expect(home.inflows.where((e) => e.isPassive).single.value, 300);
+    expect(home.totalLivingCosts, 3000);
+    expect(home.passiveIncomeCoverage, 0.1);
+    expect(home.outOfRatRace, isFalse);
   });
 
   testWidgets('Despesas v2 mostra estado vazio', (tester) async {

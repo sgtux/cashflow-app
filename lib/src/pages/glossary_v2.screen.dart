@@ -149,6 +149,23 @@ const _groups = [
         'Gasta R\$ 2.000 por mês? Uma boa reserva fica entre R\$ 6.000 e '
             'R\$ 12.000.'),
   ]),
+  _Group('Liberdade financeira', [
+    _Term(
+        'Renda passiva',
+        'Dinheiro que entra sem você precisar trabalhar por ele: aluguéis, '
+            'dividendos (inclusive de FIIs), juros, royalties, lucro de um '
+            'negócio que roda sozinho e aposentadoria.',
+        'Um FII que paga R\$ 80 por mês é renda passiva. O salário não é: se '
+            'você parar de trabalhar, ele para.'),
+    _Term(
+        'Corrida dos ratos',
+        'Quando todo o dinheiro que paga suas contas depende do seu trabalho. '
+            'Você sai dela quando a renda passiva cobre todo o seu custo de '
+            'vida: as saídas do mês, sem contar o que você investe.',
+        'Saídas de R\$ 3.500, sendo R\$ 500 de aporte, e renda passiva de '
+            'R\$ 750: o custo de vida é R\$ 3.000 e você cobre 25%. Ao '
+            'chegar em 100%, saiu da corrida.'),
+  ]),
   _Group('Veículos', [
     _Term(
         'Abastecimento',

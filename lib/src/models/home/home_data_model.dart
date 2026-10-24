@@ -11,6 +11,13 @@ class HomeDataModel {
   final num totalInflows;
   final num totalOutflows;
 
+  /// Corrida dos ratos: quanto do custo de vida (saídas sem os aportes em
+  /// investimento) a renda passiva cobre. 1 = 100%.
+  final num totalPassiveInflows;
+  final num totalLivingCosts;
+  final num passiveIncomeCoverage;
+  final bool outOfRatRace;
+
   HomeDataModel(
       {required this.month,
       required this.year,
@@ -19,7 +26,11 @@ class HomeDataModel {
       required this.inflows,
       required this.outflows,
       required this.totalInflows,
-      required this.totalOutflows});
+      required this.totalOutflows,
+      this.totalPassiveInflows = 0,
+      this.totalLivingCosts = 0,
+      this.passiveIncomeCoverage = 0,
+      this.outOfRatRace = false});
 
   factory HomeDataModel.fromMap(Map<String, dynamic> map) {
     List<HomeDescriptionValue> pendingPaymentsList = [];
@@ -51,11 +62,14 @@ class HomeDataModel {
         inflows: inflowsList,
         outflows: outflowsList,
         totalInflows: map['totalInflows'],
-        totalOutflows: map['totalOutflows']);
+        totalOutflows: map['totalOutflows'],
+        totalPassiveInflows: map['totalPassiveInflows'] ?? 0,
+        totalLivingCosts: map['totalLivingCosts'] ?? 0,
+        passiveIncomeCoverage: map['passiveIncomeCoverage'] ?? 0,
+        outOfRatRace: map['outOfRatRace'] ?? false);
   }
 
-  factory HomeDataModel.initialValue() {   
-
+  factory HomeDataModel.initialValue() {
     return HomeDataModel(
         month: 0,
         year: 0,
