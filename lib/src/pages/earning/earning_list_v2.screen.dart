@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/components/v2/type_avatar.dart';
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/earning/earning_model.dart';
 import 'package:cashflow_app/src/services/earning.service.dart';
@@ -242,8 +243,7 @@ class _EarningListV2BodyState extends State<_EarningListV2Body> {
                 padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
                 child: Row(
                   children: [
-                    CircleIcon(Icons.trending_up_rounded,
-                        color: inColor(scheme)),
+                    EarningTypeAvatar(type: earning.type),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

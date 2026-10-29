@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/components/v2/type_avatar.dart';
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/earning/earning_model.dart';
 import 'package:cashflow_app/src/models/type_model.dart';
@@ -157,7 +158,14 @@ class _EarningDetailV2BodyState extends State<_EarningDetailV2Body> {
                 ),
                 items: _types
                     .map((t) => DropdownMenuItem(
-                        value: t.id, child: Text(t.description)))
+                        value: t.id,
+                        child: Row(children: [
+                          EarningTypeAvatar(type: t.id, size: 26),
+                          const SizedBox(width: 10),
+                          Expanded(
+                              child: Text(t.description,
+                                  overflow: TextOverflow.ellipsis)),
+                        ])))
                     .toList(),
                 onChanged: (id) =>
                     setState(() => _type = id ?? defaultEarningTypeId),

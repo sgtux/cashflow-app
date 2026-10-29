@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/components/v2/type_avatar.dart';
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/recurring/recurring_model.dart';
 import 'package:cashflow_app/src/pages/recurring/recurring_texts.dart';
@@ -320,7 +321,9 @@ class _RecurringTile extends StatelessWidget {
           children: [
             Row(
               children: [
-                CircleIcon(texts.icon, color: color),
+                isEarning
+                    ? EarningTypeAvatar(type: item.type)
+                    : ExpenseTypeAvatar(type: item.type),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

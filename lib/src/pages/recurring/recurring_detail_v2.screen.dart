@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/components/v2/type_avatar.dart';
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/credit-card/credit_card_model.dart';
 import 'package:cashflow_app/src/models/recurring/recurring_model.dart';
@@ -236,7 +237,16 @@ class _RecurringDetailV2BodyState extends State<_RecurringDetailV2Body> {
                 ),
                 items: _types
                     .map((t) => DropdownMenuItem(
-                        value: t.id, child: Text(t.description)))
+                        value: t.id,
+                        child: Row(children: [
+                          _kind == RecurringKind.earning
+                              ? EarningTypeAvatar(type: t.id, size: 26)
+                              : ExpenseTypeAvatar(type: t.id, size: 26),
+                          const SizedBox(width: 10),
+                          Expanded(
+                              child: Text(t.description,
+                                  overflow: TextOverflow.ellipsis)),
+                        ])))
                     .toList(),
                 onChanged: (id) =>
                     setState(() => _type = id ?? _kind.defaultType),

@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/components/v2/type_avatar.dart';
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/credit-card/credit_card_model.dart';
 import 'package:cashflow_app/src/models/household-expense/household_expense_model.dart';
@@ -245,7 +246,14 @@ class _HouseholdExpenseDetailV2BodyState
                     ),
                     items: _types
                         .map((t) => DropdownMenuItem(
-                            value: t, child: Text(t.description)))
+                            value: t,
+                            child: Row(children: [
+                              ExpenseTypeAvatar(type: t.id, size: 26),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                  child: Text(t.description,
+                                      overflow: TextOverflow.ellipsis)),
+                            ])))
                         .toList(),
                     onChanged: (type) => setState(() => _selectedType = type),
                     validator: (type) =>

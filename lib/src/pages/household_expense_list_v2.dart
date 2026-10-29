@@ -1,3 +1,4 @@
+import 'package:cashflow_app/src/components/v2/type_avatar.dart';
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/household-expense/household_expense_model.dart';
 import 'package:cashflow_app/src/services/household_expense.service.dart';
@@ -208,13 +209,18 @@ class _SummaryCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final total = expenses.fold<double>(0, (sum, e) => sum + e.value.abs());
 
-    final byType = <String, double>{};
+    final byType = <int, _Category>{};
     for (final e in expenses) {
-      final type =
-          (e.typeDescription ?? '').isEmpty ? 'Outros' : e.typeDescription!;
-      byType[type] = (byType[type] ?? 0) + e.value.abs();
+      final category = byType.putIfAbsent(
+          e.type,
+          () => _Category(
+              e.type,
+              (e.typeDescription ?? '').isEmpty
+                  ? 'Outros'
+                  : e.typeDescription!));
+      category.value += e.value.abs();
     }
-    final categories = byType.entries.toList()
+    final categories = byType.values.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     if (categories.length > _maxCategories) {
       final rest = categories
@@ -222,7 +228,7 @@ class _SummaryCard extends StatelessWidget {
           .fold<double>(0, (sum, e) => sum + e.value);
       categories
         ..removeRange(_maxCategories - 1, categories.length)
-        ..add(MapEntry('Outros', rest));
+        ..add(_Category(ExpenseTypes.others, 'Outros')..value = rest);
     }
 
     return V2Card(
@@ -260,8 +266,10 @@ class _SummaryCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
+                      ExpenseTypeAvatar(type: category.type, size: 24),
+                      const SizedBox(width: 8),
                       Expanded(
-                        child: Text(category.key,
+                        child: Text(category.description,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium),
@@ -278,7 +286,7 @@ class _SummaryCard extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: share,
                       minHeight: 6,
-                      color: scheme.tertiary,
+                      color: expenseTypeColor(category.type),
                       backgroundColor: scheme.surfaceContainerHighest,
                     ),
                   ),
@@ -290,6 +298,14 @@ class _SummaryCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _Category {
+  _Category(this.type, this.description);
+
+  final int type;
+  final String description;
+  double value = 0;
 }
 
 class _DayHeader extends StatelessWidget {
@@ -333,18 +349,13 @@ class _ExpenseTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final hasVehicle = expense.vehicleId != null;
 
     return V2Card(
       onTap: onTap,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          CircleIcon(
-              hasVehicle
-                  ? Icons.directions_car_rounded
-                  : Icons.receipt_long_rounded,
-              color: scheme.tertiary),
+          ExpenseTypeAvatar(type: expense.type),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
