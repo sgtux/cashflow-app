@@ -3,6 +3,7 @@ import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/credit-card/credit_card_model.dart';
 import 'package:cashflow_app/src/models/recurring/recurring_model.dart';
 import 'package:cashflow_app/src/models/type_model.dart';
+import 'package:cashflow_app/src/pages/recurring/recurring_history_dialog.dart';
 import 'package:cashflow_app/src/pages/recurring/recurring_texts.dart';
 import 'package:cashflow_app/src/services/credit_card.service.dart';
 import 'package:cashflow_app/src/services/earning.service.dart';
@@ -149,7 +150,7 @@ class _RecurringDetailV2BodyState extends State<_RecurringDetailV2Body> {
   Future<void> _editHistory([RecurringHistoryModel? history]) async {
     final saved = await showDialog<RecurringHistoryModel>(
       context: context,
-      builder: (_) => _HistoryDialog(
+      builder: (_) => RecurringHistoryDialog(
         texts: _texts,
         history: history ??
             RecurringHistoryModel(
@@ -339,94 +340,6 @@ class _RecurringDetailV2BodyState extends State<_RecurringDetailV2Body> {
       ),
       bottomNavigationBar: BottomActionBar(
           label: 'Salvar', isLoading: _isSaving, onPressed: _save),
-    );
-  }
-}
-
-/// Adiciona ou edita um registro do histórico (valor e data).
-class _HistoryDialog extends StatefulWidget {
-  const _HistoryDialog({Key? key, required this.texts, required this.history})
-      : super(key: key);
-
-  final RecurringTexts texts;
-  final RecurringHistoryModel history;
-
-  @override
-  State<_HistoryDialog> createState() => _HistoryDialogState();
-}
-
-class _HistoryDialogState extends State<_HistoryDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _valueController = MoneyMaskedTextController(
-      decimalSeparator: ',', thousandSeparator: '.', leftSymbol: 'R\$ ');
-  late DateTime? _date = widget.history.date;
-
-  @override
-  void initState() {
-    super.initState();
-    _valueController.updateValue(widget.history.value);
-  }
-
-  @override
-  void dispose() {
-    _valueController.dispose();
-    super.dispose();
-  }
-
-  void _save() {
-    if (!_formKey.currentState!.validate()) return;
-    final h = widget.history;
-    Navigator.pop(
-        context,
-        RecurringHistoryModel(
-            kind: h.kind,
-            id: h.id,
-            parentId: h.parentId,
-            value: _valueController.numberValue,
-            date: _date!));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.history.id > 0 ? 'Editar registro' : 'Novo registro'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _valueController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: widget.texts.historyValueLabel,
-                prefixIcon: const Icon(Icons.payments_outlined),
-              ),
-              validator: (_) => _valueController.numberValue <= 0
-                  ? 'Informe um valor maior que zero'
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            DateFormField(
-              label: 'Data',
-              value: _date,
-              helperText: 'Só pode haver um registro por mês.',
-              onChanged: (date) => setState(() => _date = date),
-              validator: (date) => date == null ? 'Informe a data' : null,
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar')),
-        FilledButton(
-          style: FilledButton.styleFrom(minimumSize: const Size(88, 40)),
-          onPressed: _save,
-          child: const Text('Salvar'),
-        ),
-      ],
     );
   }
 }
