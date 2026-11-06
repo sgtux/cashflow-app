@@ -19,6 +19,13 @@ class RecurringTexts {
   final String pending;
   final String inactive;
   final String quickAction;
+
+  /// Ao tocar na ação rápida, pergunta o valor e a data em vez de registrar
+  /// direto com o valor de costume.
+  final bool askValueOnDone;
+  final String? doneDialogTitle;
+  final String? doneValueHelper;
+  final String? doneDateLabel;
   final String historyTitle;
   final String historyValueLabel;
   final String historyEmpty;
@@ -48,6 +55,10 @@ class RecurringTexts {
       required this.pending,
       required this.inactive,
       required this.quickAction,
+      this.askValueOnDone = false,
+      this.doneDialogTitle,
+      this.doneValueHelper,
+      this.doneDateLabel,
       required this.historyTitle,
       required this.historyValueLabel,
       required this.historyEmpty,
@@ -118,6 +129,11 @@ class RecurringTexts {
     pending: 'A pagar',
     inactive: 'Encerrada',
     quickAction: 'Paguei',
+    askValueOnDone: true,
+    doneDialogTitle: 'Quanto você pagou?',
+    doneValueHelper:
+        'Já vem com o valor de costume. Veio diferente? Coloque o valor real.',
+    doneDateLabel: 'Data do pagamento',
     historyTitle: 'Histórico de pagamentos',
     historyValueLabel: 'Valor pago',
     historyEmpty: 'Nenhum pagamento registrado ainda.',

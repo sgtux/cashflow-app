@@ -1,6 +1,7 @@
 import 'package:cashflow_app/src/components/v2/type_avatar.dart';
 import 'package:cashflow_app/src/components/v2/v2_widgets.dart';
 import 'package:cashflow_app/src/models/recurring/recurring_model.dart';
+import 'package:cashflow_app/src/pages/recurring/recurring_history_dialog.dart';
 import 'package:cashflow_app/src/pages/recurring/recurring_texts.dart';
 import 'package:cashflow_app/src/services/recurring.service.dart';
 import 'package:cashflow_app/src/utils/constants.dart';
@@ -11,7 +12,7 @@ typedef RecurringLoader = Future<List<RecurringModel>> Function(
     BuildContext context, bool showInactive);
 
 /// Ganhos fixos ou contas fixas: total do mês, o que falta receber/pagar e
-/// atalho para registrar o mês com o valor de costume.
+/// atalho para registrar o mês (contas fixas confirmam o valor pago).
 class RecurringListV2Screen extends StatelessWidget {
   const RecurringListV2Screen({Key? key, required this.kind, this.loadItems})
       : super(key: key);
@@ -86,17 +87,38 @@ class _RecurringListV2BodyState extends State<_RecurringListV2Body> {
     _load();
   }
 
-  /// Registra o mês com o valor de costume e a data de hoje.
+  /// Registra o mês. Para contas fixas pergunta antes quanto foi pago (vem
+  /// com o valor de costume e a data de hoje); para ganhos registra direto.
   Future<void> _quickDone(RecurringModel item) async {
+    var history = RecurringHistoryModel(
+        kind: _kind,
+        id: 0,
+        parentId: item.id,
+        value: item.value,
+        date: DateTime.now());
+
+    if (_texts.askValueOnDone) {
+      final confirmed = await showDialog<RecurringHistoryModel>(
+        context: context,
+        builder: (_) => RecurringHistoryDialog(
+          texts: _texts,
+          history: history,
+          title: _texts.doneDialogTitle,
+          subtitle: item.description,
+          valueHelper: _texts.doneValueHelper,
+          dateLabel: _texts.doneDateLabel ?? 'Data',
+          dateHelper: null,
+          saveLabel: _texts.quickAction,
+        ),
+      );
+      if (confirmed == null || !mounted) return;
+      history = confirmed;
+    }
+
     setState(() => _isLoading = true);
     try {
-      final result = await RecurringService(context, _kind).saveHistory(
-          RecurringHistoryModel(
-              kind: _kind,
-              id: 0,
-              parentId: item.id,
-              value: item.value,
-              date: DateTime.now()));
+      final result =
+          await RecurringService(context, _kind).saveHistory(history);
       if (mounted && result.isValid()) {
         showSuccess(context, '${item.description}: registrado!');
       }

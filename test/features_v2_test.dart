@@ -411,6 +411,26 @@ void main() {
     expect(find.text('Nada encontrado com esses filtros'), findsOneWidget);
   });
 
+  testWidgets('Paguei na conta fixa pergunta o valor pago', (tester) async {
+    await pumpScreen(
+        tester,
+        const Size(412, 915),
+        RecurringListV2Screen(
+            kind: RecurringKind.expense,
+            loadItems: (_, __) async =>
+                sampleRecurringList(RecurringKind.expense)));
+    await scrollTo(tester, find.text('Paguei'));
+    await tester.tap(find.text('Paguei'));
+    await tester.pumpAndSettle();
+    expect(find.text('Quanto você pagou?'), findsOneWidget);
+    expect(find.text('Data do pagamento'), findsOneWidget);
+    expect(find.textContaining('1.800,00'), findsWidgets);
+    await tester.tap(find.text('Cancelar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Quanto você pagou?'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Parcela marcada como paga usa valor e vencimento',
       (tester) async {
     await pumpScreen(
